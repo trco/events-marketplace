@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from .models import Event
 
 
 def index(request):
@@ -6,4 +7,13 @@ def index(request):
 
 
 def create_event(request):
-    return render(request, 'events/create_event.html')
+    context = {}
+
+    if request.method == 'POST':
+        event = Event.objects.create(title=request.POST.get('title_text'))
+        return redirect('create_event')
+
+    events = Event.objects.all()
+    context['events'] = events
+
+    return render(request, 'events/create_event.html', context)

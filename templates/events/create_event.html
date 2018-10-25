@@ -5,5 +5,16 @@
   </head>
   <body>
     <h1>Add Event</h1>
+    <form method="post">
+      {% csrf_token %}
+      <input id="id_title" type="text" name="title_text" value="">
+    </form>
+    <table id="id_event_table">
+      {% for event in events %}
+        <tr>
+          <td>{{ event.title }}</td>
+        </tr>
+      {% endfor %}
+    </table>
   </body>
 </html>

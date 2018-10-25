@@ -1,4 +1,5 @@
 from django.test import TestCase
+from .models import Event
 
 
 class HomePageTest(TestCase):
@@ -7,6 +8,38 @@ class HomePageTest(TestCase):
         self.assertContains(response, 'Events Marketplace')
         self.assertContains(response, 'Add Event')
 
-    def test_add_event_click(self):
+    def test_go_to_create_event(self):
         response = self.client.get('/events/add')
         self.assertContains(response, 'Add Event')
+
+
+class CreateEventTest(TestCase):
+    def test_create_event_post(self):
+        response = self.client.post(
+            '/events/add',
+            data={'title_text': 'Test title #1'}
+        )
+        self.assertEqual(Event.objects.count(), 1)
+        new_event = Event.objects.first()
+        self.assertEqual(new_event.title, 'Test title #1')
+
+    def test_redirect_after_post(self):
+        response = self.client.post(
+            '/events/add',
+            data={'title_text': 'Test title #1'}
+        )
+        new_event = Event.objects.first()
+        self.assertRedirects(response, f'/events/add')
+
+    def test_display_events(self):
+        event_one = Event.objects.create(title='Test event #1')
+        event_two = Event.objects.create(title='Test event #2')
+
+        response = self.client.get(f'/events/add')
+
+        self.assertContains(response, 'Test event #1')
+        self.assertContains(response, 'Test event #2')
+
+
+class EventModelTest(TestCase):
+    pass
