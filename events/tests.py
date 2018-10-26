@@ -12,6 +12,15 @@ class HomePageTest(TestCase):
         response = self.client.get('/events/add')
         self.assertContains(response, 'Add Event')
 
+    def test_display_events_at_index(self):
+        event_one = Event.objects.create(title='Test event #1')
+        event_two = Event.objects.create(title='Test event #2')
+
+        response = self.client.get(f'/')
+
+        self.assertContains(response, 'Test event #1')
+        self.assertContains(response, 'Test event #2')
+
 
 class CreateEventTest(TestCase):
     def test_create_event_post(self):

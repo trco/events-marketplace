@@ -6,5 +6,12 @@
   <body>
     <h1>Events Marketplace</h1>
     <a href="/events/add">Add Event</a>
+    <table id="id_event_table">
+      {% for event in events %}
+        <tr>
+          <td>{{ event.title }}</td>
+        </tr>
+      {% endfor %}
+    </table>
   </body>
 </html>

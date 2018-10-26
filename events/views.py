@@ -3,7 +3,10 @@ from .models import Event
 
 
 def index(request):
-    return render(request, 'events/index.html')
+    context = {}
+    events = Event.objects.all()
+    context['events'] = events
+    return render(request, 'events/index.html', context)
 
 
 def create_event(request):

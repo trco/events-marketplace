@@ -71,7 +71,14 @@ class AddEventTest(LiveServerTestCase):
         self.wait_for_row_in_table('Test event #1')
         self.wait_for_row_in_table('Test event #2')
 
-        # he is redirected to his dedicated profile page &
-        # event is published at index
+        # TODO: he is redirected to his dedicated profile page
+
+        # he checks that event is published at index
+        self.browser.get(self.live_server_url)
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, f'/')
+
+        self.wait_for_row_in_table('Test event #1')
+        self.wait_for_row_in_table('Test event #2')
 
         # he sees all his published events
