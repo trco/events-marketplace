@@ -9,6 +9,7 @@ class HomePageTest(TestCase):
         self.assertContains(response, 'Add Event')
 
     def test_go_to_create_event(self):
+
         response = self.client.get('/events/add')
         self.assertContains(response, 'Add Event')
 
@@ -48,6 +49,29 @@ class CreateEventTest(TestCase):
 
         self.assertContains(response, 'Test event #1')
         self.assertContains(response, 'Test event #2')
+        # check Edit button
+        self.assertContains(response, 'Edit')
+
+
+class UpdateEventTest(TestCase):
+    def test_update_event_post(self):
+        event = Event.objects.create(title='Test event #1')
+        response = self.client.post(
+            f'/events/edit/{ event.id }',
+            data={'title_text': 'Test title #2'}
+        )
+
+        self.assertEqual(Event.objects.count(), 1)
+        updated_event = Event.objects.first()
+        self.assertEqual(updated_event.title, 'Test title #2')
+
+    def test_redirect_after_post(self):
+        event = Event.objects.create(title='Test event #1')
+        response = self.client.post(
+            f'/events/edit/{ event.id }',
+            data={'title_text': 'Test title #2'}
+        )
+        self.assertRedirects(response, f'/events/add')
 
 
 class EventModelTest(TestCase):

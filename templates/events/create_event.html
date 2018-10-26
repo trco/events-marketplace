@@ -14,6 +14,7 @@
         <tr>
           <td>{{ event.title }}</td>
         </tr>
+        <a href="{% url 'update_event' event.id %}" id="id_edit_link">Edit</a>
       {% endfor %}
     </table>
   </body>
