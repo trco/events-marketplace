@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -18,6 +19,7 @@ def login_redirection(request):
     )
 
 
+@login_required
 def user_profile(request, username=None):
     context = {}
     events = Event.objects.all()
@@ -25,17 +27,24 @@ def user_profile(request, username=None):
     return render(request, 'events/user_profile.html', context)
 
 
+@login_required
 def create_update_event(request, event_id=None):
     context = {}
 
     if request.method == 'POST' and event_id is None:
         event = Event.objects.create(title=request.POST.get('title_text'))
-        return redirect('create_event')
+        return HttpResponseRedirect(reverse(
+            'user_profile',
+            args=[request.user.username])
+        )
     elif request.method == 'POST' and event_id is not None:
         event = Event.objects.get(id=event_id)
         event.title = request.POST.get('title_text')
         event.save()
-        return redirect('create_event')
+        return HttpResponseRedirect(reverse(
+            'user_profile',
+            args=[request.user.username])
+        )
 
     events = Event.objects.all()
     context['events'] = events

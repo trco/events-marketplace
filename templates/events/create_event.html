@@ -8,18 +8,7 @@
     <form method="post">
       {% csrf_token %}
       <input id="id_title" type="text" name="title_text" value="">
+      <input id="id_submit_btn" type="submit" name="" value="Save">
     </form>
-    <table id="id_event_table">
-      {% for event in events %}
-        <tr>
-          <td>{{ event.title }}</td>
-        </tr>
-        <tr>
-          <td>
-            <a href="{% url 'update_event' event.id %}" id="id_edit_link">Edit</a>
-          </td>
-        </tr>
-      {% endfor %}
-    </table>
   </body>
 </html>
