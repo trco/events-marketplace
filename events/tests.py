@@ -1,8 +1,31 @@
+from django.contrib.auth.models import User
 from django.test import TestCase
 from .models import Event
 
 
-class HomePageTest(TestCase):
+class LoginLogoutTest(TestCase):
+    def setUp(self):
+        # create user
+        user = User.objects.create_user(username='user', password='test1234')
+
+    def test_login_logout(self):
+        # login
+        response = self.client.login(
+            username='user',
+            password='test1234'
+        )
+        response = self.client.get('/')
+        # check that the user is logged in
+        self.assertEqual(str(response.context['user']), 'user')
+
+        # logout
+        response = self.client.logout()
+        response = self.client.get('/')
+        # check that the user is logged out
+        self.assertEqual(str(response.context['user']), 'AnonymousUser')
+
+
+class IndexViewTest(TestCase):
     def test_index_visit(self):
         response = self.client.get('/')
         self.assertContains(response, 'Events Marketplace')
@@ -23,7 +46,7 @@ class HomePageTest(TestCase):
         self.assertContains(response, 'Test event #2')
 
 
-class CreateEventTest(TestCase):
+class CreateEventViewTest(TestCase):
     def test_create_event_post(self):
         response = self.client.post(
             '/events/add',
@@ -53,7 +76,7 @@ class CreateEventTest(TestCase):
         self.assertContains(response, 'Edit')
 
 
-class UpdateEventTest(TestCase):
+class UpdateEventViewTest(TestCase):
     def test_update_event_post(self):
         event = Event.objects.create(title='Test event #1')
         response = self.client.post(

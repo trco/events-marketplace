@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Events Marketplace</title>
+  </head>
+  <body>
+    <h1>Login</h1>
+    <form method="post">
+      {% csrf_token %}
+      <div class="{% if form.non_field_errors %}invalid{% endif %}">
+        {% for error in form.non_field_errors %}
+          {{ error }}
+        {% endfor %}
+      </div>
+
+      {% for field in form %}
+        <div class="form-group">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          <div class="{% if field.errors %} invalid{% endif %}">
+            {% for error in field.errors %}
+              <p class="help-block">{{ error }}</p>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+      <button id="id_login_btn" type="submit">Log in</button>
+    </form>
+  </body>
+</html>

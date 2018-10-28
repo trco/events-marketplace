@@ -26,8 +26,8 @@ class AddEventTest(LiveServerTestCase):
         self.browser.find_element_by_link_text('Add Event').click()
 
         # he is redirected to the new url
-        new_url = self.browser.current_url
-        self.assertRegex(new_url, f'/events/add')
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, '/events/add')
         # he checks page content
         self.assertIn('Events Marketplace', self.browser.title)
         header_text_two = self.browser.find_element_by_tag_name('h1').text
@@ -53,8 +53,8 @@ class AddEventTest(LiveServerTestCase):
 
         # he checks that event is published at index
         self.browser.get(self.live_server_url)
-        new_url = self.browser.current_url
-        self.assertRegex(new_url, f'/')
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, '/')
         # he sees all his published events
         wait_for_row_in_table(self, 'Test event #1')
         wait_for_row_in_table(self, 'Test event #2')
@@ -64,14 +64,14 @@ class EditEventTest(LiveServerTestCase):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
-        self.new_event = Event.objects.create(title='Test event #1')
+        new_event = Event.objects.create(title='Test event #1')
 
     def tearDown(self):
         self.browser.quit()
 
     # User story
     def test_edit_event(self):
-        # TODO: user logges in & visits his profile page
+        # TODO: user logs in & visits his profile page
 
         # user visits Add Event page
         self.browser.get(self.live_server_url + '/events/add')
@@ -80,8 +80,8 @@ class EditEventTest(LiveServerTestCase):
         # he clicks Edit button & enters the page with UpdateEvent form
         self.browser.find_element_by_id('id_edit_link').click()
 
-        new_url = self.browser.current_url
-        self.assertRegex(new_url, f'/events/edit/.+')
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, '/events/edit/.+')
 
         # he changes event
         form_field = self.browser.find_element_by_id('id_title')
@@ -94,6 +94,6 @@ class EditEventTest(LiveServerTestCase):
 
         # he checks that event is udpated at index
         self.browser.get(self.live_server_url)
-        new_url = self.browser.current_url
-        self.assertRegex(new_url, f'/')
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, '/')
         wait_for_row_in_table(self, 'Test event #2')
