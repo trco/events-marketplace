@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Events Marketplace</title>
+  </head>
+  <body>
+    <h1>User profile</h1>
+    <table id="id_event_table">
+      {% for event in events %}
+        <tr>
+          <td>{{ event.title }}</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="{% url 'update_event' event.id %}" id="id_edit_link">Edit</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>

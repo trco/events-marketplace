@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -9,6 +10,11 @@ class AddEventTest(LiveServerTestCase):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
+        # create user
+        self.user = User.objects.create_user(
+            username='user',
+            password='test1234'
+        )
 
     def tearDown(self):
         self.browser.quit()
@@ -39,17 +45,30 @@ class AddEventTest(LiveServerTestCase):
         # he submits the form & creates first event
         form_field.send_keys(Keys.ENTER)
 
+        # he is redirected to his dedicated profile page
+        username = self.user.username
+        self.browser.get(self.live_server_url + f'/profile/{ username }')
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, f'/profile/{ username }')
+
         wait_for_row_in_table(self, 'Test event #1')
+
+        # he visits Add Event page again
+        self.browser.get(self.live_server_url + '/events/add')
 
         # he creates second event
         form_field = self.browser.find_element_by_id('id_title')
         form_field.send_keys('Test event #2')
         form_field.send_keys(Keys.ENTER)
 
+        # he is redirected to his dedicated profile page
+        username = self.user.username
+        self.browser.get(self.live_server_url + f'/profile/{ username }')
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, f'/profile/{ username }')
+
         wait_for_row_in_table(self, 'Test event #1')
         wait_for_row_in_table(self, 'Test event #2')
-
-        # TODO: he is redirected to his dedicated profile page with success msg
 
         # he checks that event is published at index
         self.browser.get(self.live_server_url)
@@ -64,17 +83,25 @@ class EditEventTest(LiveServerTestCase):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
-        new_event = Event.objects.create(title='Test event #1')
+        # create user
+        self.user = User.objects.create_user(
+            username='user',
+            password='test1234'
+        )
+        self.new_event = Event.objects.create(title='Test event #1')
 
     def tearDown(self):
         self.browser.quit()
 
     # User story
     def test_edit_event(self):
-        # TODO: user logs in & visits his profile page
+        # user visits his profile page
+        username = self.user.username
+        self.browser.get(self.live_server_url + f'/profile/{ username }')
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, f'/profile/{ username }')
 
-        # user visits Add Event page
-        self.browser.get(self.live_server_url + '/events/add')
+        # he sees his events
         wait_for_row_in_table(self, 'Test event #1')
 
         # he clicks Edit button & enters the page with UpdateEvent form
@@ -83,14 +110,16 @@ class EditEventTest(LiveServerTestCase):
         redirect_url = self.browser.current_url
         self.assertRegex(redirect_url, '/events/edit/.+')
 
-        # he changes event
+        # he updates event
         form_field = self.browser.find_element_by_id('id_title')
         form_field.send_keys('Test event #2')
         form_field.send_keys(Keys.ENTER)
 
-        wait_for_row_in_table(self, 'Test event #2')
+        # he is redirected to his dedicated profile page with success msg
+        self.browser.get(self.live_server_url + f'/profile/{ username }')
 
-        # TODO: he is redirected to his dedicated profile page with success msg
+        # he sees updated event
+        wait_for_row_in_table(self, 'Test event #2')
 
         # he checks that event is udpated at index
         self.browser.get(self.live_server_url)

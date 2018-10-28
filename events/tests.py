@@ -6,7 +6,10 @@ from .models import Event
 class LoginLogoutTest(TestCase):
     def setUp(self):
         # create user
-        user = User.objects.create_user(username='user', password='test1234')
+        self.user = User.objects.create_user(
+            username='user',
+            password='test1234'
+        )
 
     def test_login_logout(self):
         # login
@@ -40,10 +43,42 @@ class IndexViewTest(TestCase):
         event_one = Event.objects.create(title='Test event #1')
         event_two = Event.objects.create(title='Test event #2')
 
-        response = self.client.get(f'/')
+        response = self.client.get('/')
 
         self.assertContains(response, 'Test event #1')
         self.assertContains(response, 'Test event #2')
+
+
+class LoginRedirectionViewTest(TestCase):
+    def setUp(self):
+        # create user
+        self.user = User.objects.create_user(
+            username='user',
+            password='test1234'
+        )
+
+    def test_login_redirection(self):
+        # login
+        self.client.login(username='user', password='test1234')
+
+        response = self.client.get('/login/redirection/')
+        username = self.user.username
+        self.assertRedirects(response, f'/profile/{ username }')
+
+
+class UserProfileTest(TestCase):
+    def setUp(self):
+        # create user
+        self.user = User.objects.create_user(
+            username='user',
+            password='test1234'
+        )
+        self.new_event = Event.objects.create(title='Test event #1')
+
+    def test_display_user_events(self):
+        username = self.user.username
+        response = self.client.get(f'/profile/{ username }')
+        self.assertContains(response, 'Test event #1')
 
 
 class CreateEventViewTest(TestCase):
@@ -62,13 +97,13 @@ class CreateEventViewTest(TestCase):
             data={'title_text': 'Test title #1'}
         )
         new_event = Event.objects.first()
-        self.assertRedirects(response, f'/events/add')
+        self.assertRedirects(response, '/events/add')
 
     def test_display_events(self):
         event_one = Event.objects.create(title='Test event #1')
         event_two = Event.objects.create(title='Test event #2')
 
-        response = self.client.get(f'/events/add')
+        response = self.client.get('/events/add')
 
         self.assertContains(response, 'Test event #1')
         self.assertContains(response, 'Test event #2')
@@ -94,7 +129,7 @@ class UpdateEventViewTest(TestCase):
             f'/events/edit/{ event.id }',
             data={'title_text': 'Test title #2'}
         )
-        self.assertRedirects(response, f'/events/add')
+        self.assertRedirects(response, '/events/add')
 
 
 class EventModelTest(TestCase):
