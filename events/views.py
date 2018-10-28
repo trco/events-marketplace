@@ -22,7 +22,7 @@ def login_redirection(request):
 @login_required
 def user_profile(request, username=None):
     context = {}
-    events = Event.objects.all()
+    events = Event.objects.filter(user=request.user)
     context['events'] = events
     return render(request, 'events/user_profile.html', context)
 
@@ -32,7 +32,10 @@ def create_update_event(request, event_id=None):
     context = {}
 
     if request.method == 'POST' and event_id is None:
-        event = Event.objects.create(title=request.POST.get('title_text'))
+        event = Event.objects.create(
+            title=request.POST.get('title_text'),
+            user_id=request.POST.get('user_id')
+        )
         return HttpResponseRedirect(reverse(
             'user_profile',
             args=[request.user.username])

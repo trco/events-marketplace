@@ -51,8 +51,10 @@ class AddEventTest(LiveServerTestCase):
         self.assertIn('Add Event', header_text_two)
 
         # he fills out & submits CreateEvent form
-        form_field = self.browser.find_element_by_id('id_title')
-        form_field.send_keys('Test event #1')
+        title_field = self.browser.find_element_by_id('id_title')
+        title_field.send_keys('Test event #1')
+        user_field = self.browser.find_element_by_id('id_user')
+        user_field.send_keys('1')
         submit_btn = self.browser.find_element_by_id('id_submit_btn').click()
 
         # he is redirected to his dedicated profile page
@@ -65,8 +67,10 @@ class AddEventTest(LiveServerTestCase):
         self.browser.get(self.live_server_url + '/events/add')
 
         # he fills out & submits CreateEvent form once more
-        form_field = self.browser.find_element_by_id('id_title')
-        form_field.send_keys('Test event #2')
+        title_field = self.browser.find_element_by_id('id_title')
+        title_field.send_keys('Test event #2')
+        user_field = self.browser.find_element_by_id('id_user')
+        user_field.send_keys('1')
         submit_btn = self.browser.find_element_by_id('id_submit_btn').click()
 
         # he is redirected to his dedicated profile page
@@ -95,7 +99,10 @@ class EditEventTest(LiveServerTestCase):
             password='test1234'
         )
         # create event
-        self.event = Event.objects.create(title='Test event #1')
+        self.event = Event.objects.create(
+            title='Test event #1',
+            user=self.user
+        )
 
     def tearDown(self):
         self.browser.quit()
@@ -143,3 +150,69 @@ class EditEventTest(LiveServerTestCase):
         new_url = self.browser.current_url
         self.assertRegex(new_url, '/')
         wait_for_row_in_table(self, 'Test event #2')
+
+
+class UniqueProfilesOwnedEventsTest(LiveServerTestCase):
+
+    def setUp(self):
+        self.browser = webdriver.Firefox()
+        # create users
+        self.user_1 = User.objects.create_user(
+            username='user_1',
+            password='test1234'
+        )
+        self.user_2 = User.objects.create_user(
+            username='user_2',
+            password='test1234'
+        )
+        # create events
+        self.event_1 = Event.objects.create(title='Test event #1')
+        self.event_2 = Event.objects.create(title='Test event #2')
+
+    def tearDown(self):
+        self.browser.quit()
+
+    # User story
+    def test_users_have_unique_profile_with_owned_events(self):
+        # user_1 visits login page
+        self.browser.get(self.live_server_url + '/accounts/login')
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, '/accounts/login')
+
+        # he fills out & submits login form
+        username_field = self.browser.find_element_by_id('id_username')
+        password_field = self.browser.find_element_by_id('id_password')
+        username_field.send_keys('user_1')
+        password_field.send_keys('test1234')
+        self.browser.find_element_by_id('id_login_btn').click()
+
+        # he is redirected to his dedicated profile page
+        redirect_url_1 = self.browser.current_url
+        self.assertRegex(redirect_url_1, f'/profile/{ self.user_1.username }')
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Test event #2', page_text)
+
+        # new browser session
+        self.browser.quit()
+        self.browser = webdriver.Firefox()
+
+        # user_2 visits login page
+        self.browser.get(self.live_server_url + '/accounts/login')
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, '/accounts/login')
+
+        # he fills out & submits login form
+        username_field = self.browser.find_element_by_id('id_username')
+        password_field = self.browser.find_element_by_id('id_password')
+        username_field.send_keys('user_2')
+        password_field.send_keys('test1234')
+        self.browser.find_element_by_id('id_login_btn').click()
+
+        # he is redirected to his dedicated profile page
+        redirect_url_2 = self.browser.current_url
+        self.assertRegex(redirect_url_2, f'/profile/{ self.user_2.username }')
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Test event #2', page_text)
+
+        # check that first and second user's profile urls are different
+        self.assertNotEqual(redirect_url_1, redirect_url_2)
