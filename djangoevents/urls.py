@@ -9,7 +9,7 @@ urlpatterns = [
          name='login_redirection'),
     path('', events_views.index, name='index'),
     path('<str:username>', events_views.user_profile, name='user_profile'),
-    path('events/add', events_views.create_update_event, name='create_event'),
-    path('events/edit/<int:event_id>', events_views.create_update_event,
+    path('events/add', events_views.create_event, name='create_event'),
+    path('events/edit/<int:event_id>', events_views.update_event,
          name='update_event')
 ]

@@ -1,7 +1,9 @@
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from .decorators import user_is_event_owner
 from .models import Event
 
 
@@ -28,10 +30,10 @@ def user_profile(request, username=None):
 
 
 @login_required
-def create_update_event(request, event_id=None):
+def create_event(request):
     context = {}
 
-    if request.method == 'POST' and event_id is None:
+    if request.method == 'POST':
         event = Event.objects.create(
             title=request.POST.get('title_text'),
             user_id=request.POST.get('user_id')
@@ -40,7 +42,19 @@ def create_update_event(request, event_id=None):
             'user_profile',
             args=[request.user.username])
         )
-    elif request.method == 'POST' and event_id is not None:
+
+    events = Event.objects.all()
+    context['events'] = events
+
+    return render(request, 'events/create_event.html', context)
+
+
+@login_required
+@user_is_event_owner
+def update_event(request, event_id):
+    context = {}
+
+    if request.method == 'POST':
         event = Event.objects.get(id=event_id)
         event.title = request.POST.get('title_text')
         event.save()
@@ -48,8 +62,5 @@ def create_update_event(request, event_id=None):
             'user_profile',
             args=[request.user.username])
         )
-
-    events = Event.objects.all()
-    context['events'] = events
 
     return render(request, 'events/create_event.html', context)

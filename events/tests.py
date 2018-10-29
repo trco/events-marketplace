@@ -124,29 +124,47 @@ class UpdateEventViewTest(TestCase):
 
     def setUp(self):
         # create user
-        self.user = User.objects.create_user(
-            username='user',
+        self.user_1 = User.objects.create_user(
+            username='user_1',
             password='test1234'
         )
-        self.event = Event.objects.create(title='Test event #1')
+        self.user_2 = User.objects.create_user(
+            username='user_2',
+            password='test1234'
+        )
+        self.event_1 = Event.objects.create(
+            title='Test event #1',
+            user=self.user_1
+        )
+        self.event_2 = Event.objects.create(
+            title='Test event #2',
+            user=self.user_2
+        )
         # login
-        self.client.login(username='user', password='test1234')
+        self.client.login(username='user_1', password='test1234')
 
     def test_update_event_post(self):
         response = self.client.post(
-            f'/events/edit/{ self.event.id }',
+            f'/events/edit/{ self.event_1.id }',
             data={'title_text': 'Test title #2'}
         )
-        self.assertEqual(Event.objects.count(), 1)
+        self.assertEqual(Event.objects.count(), 2)
         updated_event = Event.objects.first()
         self.assertEqual(updated_event.title, 'Test title #2')
 
     def test_redirect_after_post(self):
         response = self.client.post(
-            f'/events/edit/{ self.event.id }',
+            f'/events/edit/{ self.event_1.id }',
             data={'title_text': 'Test title #2'}
         )
-        self.assertRedirects(response, f'/{ self.user.username }')
+        self.assertRedirects(response, f'/{ self.user_1.username }')
+
+    def test_cannot_update_other_users_event(self):
+        response = self.client.post(
+            f'/events/edit/{ self.event_2.id }',
+            data={'title_text': 'Test title #3'}
+        )
+        self.assertEqual(response.status_code, 403)
 
 
 class EventModelTest(TestCase):

@@ -93,15 +93,23 @@ class EditEventTest(LiveServerTestCase):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
-        # create user
-        self.user = User.objects.create_user(
-            username='user',
+        # create users
+        self.user_1 = User.objects.create_user(
+            username='user_1',
             password='test1234'
         )
-        # create event
-        self.event = Event.objects.create(
+        self.user_2 = User.objects.create_user(
+            username='user_2',
+            password='test1234'
+        )
+        # create events
+        self.event_1 = Event.objects.create(
             title='Test event #1',
-            user=self.user
+            user=self.user_1
+        )
+        self.event_2 = Event.objects.create(
+            title='Test event #2',
+            user=self.user_2
         )
 
     def tearDown(self):
@@ -117,13 +125,13 @@ class EditEventTest(LiveServerTestCase):
         # he fills out & submits login form
         username_field = self.browser.find_element_by_id('id_username')
         password_field = self.browser.find_element_by_id('id_password')
-        username_field.send_keys('user')
+        username_field.send_keys('user_1')
         password_field.send_keys('test1234')
         self.browser.find_element_by_id('id_login_btn').click()
 
         # he is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/{ self.user.username }')
+        self.assertRegex(redirect_url, f'/{ self.user_1.username }')
         # he sees his events
         wait_for_row_in_table(self, 'Test event #1')
 
@@ -132,7 +140,7 @@ class EditEventTest(LiveServerTestCase):
 
         # he is redirected to the page with UpdateEvent form
         new_url = self.browser.current_url
-        self.assertRegex(new_url, f'/events/edit/{ self.event.id }')
+        self.assertRegex(new_url, f'/events/edit/{ self.event_1.id }')
 
         # he updates event
         form_field = self.browser.find_element_by_id('id_title')
@@ -141,7 +149,7 @@ class EditEventTest(LiveServerTestCase):
 
         # he is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/{ self.user.username }')
+        self.assertRegex(redirect_url, f'/{ self.user_1.username }')
         # he sees updated event
         wait_for_row_in_table(self, 'Test event #2')
 
@@ -150,6 +158,34 @@ class EditEventTest(LiveServerTestCase):
         new_url = self.browser.current_url
         self.assertRegex(new_url, '/')
         wait_for_row_in_table(self, 'Test event #2')
+
+    def test_user_can_edit_only_his_events(self):
+        # user visits login page
+        self.browser.get(self.live_server_url + '/accounts/login')
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, '/accounts/login')
+
+        # he fills out & submits login form
+        username_field = self.browser.find_element_by_id('id_username')
+        password_field = self.browser.find_element_by_id('id_password')
+        username_field.send_keys('user_1')
+        password_field.send_keys('test1234')
+        self.browser.find_element_by_id('id_login_btn').click()
+
+        # he is redirected to his dedicated profile page
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, f'/{ self.user_1.username }')
+        # he sees his events
+        wait_for_row_in_table(self, 'Test event #1')
+
+        # he tries to edit other user event
+        self.browser.get(
+            self.live_server_url + f'/events/edit/{ self.event_2.id }'
+        )
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, f'/events/edit/{ self.event_2.id }')
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('403 Forbidden', page_text)
 
 
 class UniqueProfilesOwnedEventsTest(LiveServerTestCase):
