@@ -27,7 +27,7 @@ class AuthenticationViewsTest(TestCase):
 
     def test_login_redirection(self):
         response = self.client.get('/login/redirection/')
-        self.assertRedirects(response, f'/profile/{ self.user.username }')
+        self.assertRedirects(response, f'/{ self.user.username }')
 
 
 class IndexViewTest(TestCase):
@@ -81,7 +81,7 @@ class UserProfileTest(TestCase):
             title='Test event #2',
             user=user_2
         )
-        response = self.client.get(f'/profile/{ self.user_1.username }')
+        response = self.client.get(f'/{ self.user_1.username }')
         self.assertContains(response, 'Test event #1')
         self.assertNotContains(response, 'Test event #2')
 
@@ -111,7 +111,7 @@ class CreateEventViewTest(TestCase):
             '/events/add',
             data={'title_text': 'Test title #1'}
         )
-        self.assertRedirects(response, f'/profile/{ self.user.username }')
+        self.assertRedirects(response, f'/{ self.user.username }')
 
 
 class UpdateEventViewTest(TestCase):
@@ -140,7 +140,7 @@ class UpdateEventViewTest(TestCase):
             f'/events/edit/{ self.event.id }',
             data={'title_text': 'Test title #2'}
         )
-        self.assertRedirects(response, f'/profile/{ self.user.username }')
+        self.assertRedirects(response, f'/{ self.user.username }')
 
 
 class EventModelTest(TestCase):

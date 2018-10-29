@@ -59,7 +59,7 @@ class AddEventTest(LiveServerTestCase):
 
         # he is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/profile/{ self.user.username }')
+        self.assertRegex(redirect_url, f'/{ self.user.username }')
         # he sees created event
         wait_for_row_in_table(self, 'Test event #1')
 
@@ -75,7 +75,7 @@ class AddEventTest(LiveServerTestCase):
 
         # he is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/profile/{ self.user.username }')
+        self.assertRegex(redirect_url, f'/{ self.user.username }')
         # he sees both created events
         wait_for_row_in_table(self, 'Test event #1')
         wait_for_row_in_table(self, 'Test event #2')
@@ -123,7 +123,7 @@ class EditEventTest(LiveServerTestCase):
 
         # he is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/profile/{ self.user.username }')
+        self.assertRegex(redirect_url, f'/{ self.user.username }')
         # he sees his events
         wait_for_row_in_table(self, 'Test event #1')
 
@@ -141,7 +141,7 @@ class EditEventTest(LiveServerTestCase):
 
         # he is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/profile/{ self.user.username }')
+        self.assertRegex(redirect_url, f'/{ self.user.username }')
         # he sees updated event
         wait_for_row_in_table(self, 'Test event #2')
 
@@ -194,7 +194,7 @@ class UniqueProfilesOwnedEventsTest(LiveServerTestCase):
 
         # he is redirected to his dedicated profile page
         redirect_url_1 = self.browser.current_url
-        self.assertRegex(redirect_url_1, f'/profile/{ self.user_1.username }')
+        self.assertRegex(redirect_url_1, f'/{ self.user_1.username }')
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertIn('Test event #1', page_text)
         self.assertNotIn('Test event #2', page_text)
@@ -217,7 +217,7 @@ class UniqueProfilesOwnedEventsTest(LiveServerTestCase):
 
         # he is redirected to his dedicated profile page
         redirect_url_2 = self.browser.current_url
-        self.assertRegex(redirect_url_2, f'/profile/{ self.user_2.username }')
+        self.assertRegex(redirect_url_2, f'/{ self.user_2.username }')
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertIn('Test event #2', page_text)
         self.assertNotIn('Test event #1', page_text)
