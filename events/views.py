@@ -22,7 +22,7 @@ def login_redirection(request):
 @login_required
 def user_profile(request, username=None):
     context = {}
-    events = Event.objects.filter(user=request.user)
+    events = Event.objects.filter(user__username=username)
     context['events'] = events
     return render(request, 'events/user_profile.html', context)
 

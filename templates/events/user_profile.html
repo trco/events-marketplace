@@ -10,11 +10,15 @@
         <tr>
           <td>{{ event.title }}</td>
         </tr>
-        <tr>
-          <td>
-            <a href="{% url 'update_event' event.id %}" id="id_edit_link">Edit</a>
-          </td>
-        </tr>
+        {% if user.is_authenticated %}
+          {% if event.user.username == user.username %}
+            <tr>
+              <td>
+                <a href="{% url 'update_event' event.id %}" id="id_edit_link">Edit</a>
+              </td>
+            </tr>
+          {% endif %}
+        {% endif %}
       {% endfor %}
     </table>
   </body>

@@ -224,3 +224,33 @@ class UniqueProfilesOwnedEventsTest(LiveServerTestCase):
 
         # check that first and second user's profile urls are different
         self.assertNotEqual(redirect_url_1, redirect_url_2)
+
+    def test_user_has_readonly_access_to_other_user_profiles(self):
+        # user_1 visits login page
+        self.browser.get(self.live_server_url + '/accounts/login')
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, '/accounts/login')
+
+        # he fills out & submits login form
+        username_field = self.browser.find_element_by_id('id_username')
+        password_field = self.browser.find_element_by_id('id_password')
+        username_field.send_keys('user_1')
+        password_field.send_keys('test1234')
+        self.browser.find_element_by_id('id_login_btn').click()
+
+        # he is redirected to his dedicated profile page
+        redirect_url_1 = self.browser.current_url
+        self.assertRegex(redirect_url_1, f'/{ self.user_1.username }')
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('Test event #1', page_text)
+        self.assertIn('Edit', page_text)
+        self.assertNotIn('Test event #2', page_text)
+
+        # he visits user_2 profile
+        self.browser.get(self.live_server_url + f'/{ self.user_2.username }')
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, f'/{ self.user_2.username }')
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('Test event #2', page_text)
+        self.assertNotIn('Test event #1', page_text)
+        self.assertNotIn('Edit', page_text)

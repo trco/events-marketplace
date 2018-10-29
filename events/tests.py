@@ -69,21 +69,27 @@ class UserProfileTest(TestCase):
             title='Test event #1',
             user=self.user_1
         )
+        self.user_2 = User.objects.create_user(
+            username='user_2',
+            password='test1234'
+        )
+        self.event_1 = Event.objects.create(
+            title='Test event #2',
+            user=self.user_2
+        )
         # login
         self.client.login(username='user_1', password='test1234')
 
     def test_display_user_events(self):
-        user_2 = User.objects.create_user(
-            username='user_2',
-            password='test1234'
-        )
-        event_2 = Event.objects.create(
-            title='Test event #2',
-            user=user_2
-        )
         response = self.client.get(f'/{ self.user_1.username }')
         self.assertContains(response, 'Test event #1')
         self.assertNotContains(response, 'Test event #2')
+
+    def test_display_other_user_events_readonly(self):
+        response = self.client.get(f'/{ self.user_2.username }')
+        self.assertContains(response, 'Test event #2')
+        self.assertNotContains(response, 'Test event #1')
+        self.assertNotContains(response, 'Edit')
 
 
 class CreateEventViewTest(TestCase):
