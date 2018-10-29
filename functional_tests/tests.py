@@ -166,8 +166,14 @@ class UniqueProfilesOwnedEventsTest(LiveServerTestCase):
             password='test1234'
         )
         # create events
-        self.event_1 = Event.objects.create(title='Test event #1')
-        self.event_2 = Event.objects.create(title='Test event #2')
+        self.event_1 = Event.objects.create(
+            title='Test event #1',
+            user=self.user_1
+        )
+        self.event_2 = Event.objects.create(
+            title='Test event #2',
+            user=self.user_2
+        )
 
     def tearDown(self):
         self.browser.quit()
@@ -190,6 +196,7 @@ class UniqueProfilesOwnedEventsTest(LiveServerTestCase):
         redirect_url_1 = self.browser.current_url
         self.assertRegex(redirect_url_1, f'/profile/{ self.user_1.username }')
         page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('Test event #1', page_text)
         self.assertNotIn('Test event #2', page_text)
 
         # new browser session
@@ -212,7 +219,8 @@ class UniqueProfilesOwnedEventsTest(LiveServerTestCase):
         redirect_url_2 = self.browser.current_url
         self.assertRegex(redirect_url_2, f'/profile/{ self.user_2.username }')
         page_text = self.browser.find_element_by_tag_name('body').text
-        self.assertNotIn('Test event #2', page_text)
+        self.assertIn('Test event #2', page_text)
+        self.assertNotIn('Test event #1', page_text)
 
         # check that first and second user's profile urls are different
         self.assertNotEqual(redirect_url_1, redirect_url_2)
