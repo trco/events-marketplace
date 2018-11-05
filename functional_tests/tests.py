@@ -6,6 +6,45 @@ from events.models import Event
 from .utils import wait_for_row_in_table
 
 
+class SignUpTest(LiveServerTestCase):
+
+    def setUp(self):
+        self.browser = webdriver.Firefox()
+
+    def tearDown(self):
+        self.browser.quit()
+
+    def test_visitor_can_signup_and_login(self):
+        # user visits signup page
+        self.browser.get('/accounts/signup')
+
+        # he fills out & submits signup form
+        username_field = self.browser.find_element_by_id('id_username')
+        password_field = self.browser.find_element_by_id('id_password')
+        password_2_field = self.browser.find_element_by_id('id_password_2')
+        username_field.send_keys('user_1')
+        password_field.send_keys('test1234')
+        password_2_field.send_keys('test1234')
+        self.browser.find_element_by_id('id_signup_btn').click()
+
+        # he is redirected to the login page
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, '/accounts/login')
+
+        # he can login with newly created account
+        username_field = self.browser.find_element_by_id('id_username')
+        password_field = self.browser.find_element_by_id('id_password')
+        username_field.send_keys('user_1')
+        password_field.send_keys('test1234')
+        self.browser.find_element_by_id('id_login_btn').click()
+
+        # he is redirected to his dedicated profile page
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, f'/{ self.user_1.username }')
+        header_text = self.browser.find_element_by_tag_name('h1').text
+        self.assertIn('User profile', header_text)
+
+
 class AddEventTest(LiveServerTestCase):
 
     def setUp(self):
@@ -19,7 +58,6 @@ class AddEventTest(LiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
-    # User story
     def test_visit_index_visit_add_event_create_event_visit_index(self):
         # user visits the index page
         self.browser.get(self.live_server_url)
@@ -115,7 +153,6 @@ class EditEventTest(LiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
-    # User story
     def test_edit_event(self):
         # user visits login page
         self.browser.get(self.live_server_url + '/accounts/login')
@@ -218,7 +255,6 @@ class DeleteEventTest(LiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
-    # User story
     def test_delete_event(self):
         # user visits login page
         self.browser.get(self.live_server_url + '/accounts/login')
@@ -322,7 +358,6 @@ class UniqueProfilesOwnedEventsTest(LiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
-    # User story
     def test_users_have_unique_profile_with_owned_events(self):
         # user_1 visits login page
         self.browser.get(self.live_server_url + '/accounts/login')
