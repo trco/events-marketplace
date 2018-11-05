@@ -1,5 +1,21 @@
-from selenium.common.exceptions import WebDriverException
 import time
+from django.contrib.auth.models import User
+from selenium.common.exceptions import WebDriverException
+from events.models import Event
+
+
+def create_user(username, password):
+    return User.objects.create_user(
+        username=username,
+        password=password
+    )
+
+
+def create_event(title, user):
+    return Event.objects.create(
+        title=title,
+        user=user
+    )
 
 
 def wait_for_row_in_table(func_obj, row_text):

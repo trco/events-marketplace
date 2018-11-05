@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
+from functional_tests.utils import create_event, create_user
 from .models import Event
 
 
@@ -33,23 +34,12 @@ class IndexViewTest(TestCase):
 class UserProfileTest(TestCase):
 
     def setUp(self):
-        # create user
-        self.user_1 = User.objects.create_user(
-            username='user_1',
-            password='test1234'
-        )
-        self.event_1 = Event.objects.create(
-            title='Test event #1',
-            user=self.user_1
-        )
-        self.user_2 = User.objects.create_user(
-            username='user_2',
-            password='test1234'
-        )
-        self.event_1 = Event.objects.create(
-            title='Test event #2',
-            user=self.user_2
-        )
+        # create users
+        self.user_1 = create_user('user_1', 'test1234')
+        self.user_2 = create_user('user_2', 'test1234')
+        # create events
+        self.event_1 = create_event('Test event #1', self.user_1)
+        self.event_2 = create_event('Test event #2', self.user_2)
         # login
         self.client.login(username='user_1', password='test1234')
 
@@ -68,13 +58,10 @@ class UserProfileTest(TestCase):
 class CreateEventViewTest(TestCase):
 
     def setUp(self):
-        # create user
-        self.user = User.objects.create_user(
-            username='user',
-            password='test1234'
-        )
+        # create users
+        self.user_1 = create_user('user_1', 'test1234')
         # login
-        self.client.login(username='user', password='test1234')
+        self.client.login(username='user_1', password='test1234')
 
     def test_create_event_post(self):
         response = self.client.post(
@@ -90,29 +77,18 @@ class CreateEventViewTest(TestCase):
             '/events/add',
             data={'title_text': 'Test title #1'}
         )
-        self.assertRedirects(response, f'/{ self.user.username }')
+        self.assertRedirects(response, f'/{ self.user_1.username }')
 
 
 class UpdateEventViewTest(TestCase):
 
     def setUp(self):
-        # create user
-        self.user_1 = User.objects.create_user(
-            username='user_1',
-            password='test1234'
-        )
-        self.user_2 = User.objects.create_user(
-            username='user_2',
-            password='test1234'
-        )
-        self.event_1 = Event.objects.create(
-            title='Test event #1',
-            user=self.user_1
-        )
-        self.event_2 = Event.objects.create(
-            title='Test event #2',
-            user=self.user_2
-        )
+        # create users
+        self.user_1 = create_user('user_1', 'test1234')
+        self.user_2 = create_user('user_2', 'test1234')
+        # create events
+        self.event_1 = create_event('Test event #1', self.user_1)
+        self.event_2 = create_event('Test event #2', self.user_2)
         # login
         self.client.login(username='user_1', password='test1234')
 
@@ -144,27 +120,12 @@ class DeleteEventViewTest(TestCase):
 
     def setUp(self):
         # create users
-        self.user_1 = User.objects.create_user(
-            username='user_1',
-            password='test1234'
-        )
-        self.user_2 = User.objects.create_user(
-            username='user_2',
-            password='test1234'
-        )
+        self.user_1 = create_user('user_1', 'test1234')
+        self.user_2 = create_user('user_2', 'test1234')
         # create events
-        self.event_1 = Event.objects.create(
-            title='Test event #1',
-            user=self.user_1
-        )
-        self.event_2 = Event.objects.create(
-            title='Test event #2',
-            user=self.user_1
-        )
-        self.event_3 = Event.objects.create(
-            title='Test event #3',
-            user=self.user_2
-        )
+        self.event_1 = create_event('Test event #1', self.user_1)
+        self.event_2 = create_event('Test event #2', self.user_1)
+        self.event_3 = create_event('Test event #3', self.user_2)
         # login
         self.client.login(username='user_1', password='test1234')
 

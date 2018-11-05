@@ -1,9 +1,7 @@
-from django.contrib.auth.models import User
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from events.models import Event
-from .utils import wait_for_row_in_table
+from .utils import create_event, create_user, wait_for_row_in_table
 
 
 class SignUpTest(LiveServerTestCase):
@@ -48,10 +46,7 @@ class AddEventTest(LiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
         # create user
-        self.user = User.objects.create_user(
-            username='user',
-            password='test1234'
-        )
+        self.user = create_user('user', 'test1234')
 
     def tearDown(self):
         self.browser.quit()
@@ -130,23 +125,11 @@ class EditEventTest(LiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
         # create users
-        self.user_1 = User.objects.create_user(
-            username='user_1',
-            password='test1234'
-        )
-        self.user_2 = User.objects.create_user(
-            username='user_2',
-            password='test1234'
-        )
+        self.user_1 = create_user('user_1', 'test1234')
+        self.user_2 = create_user('user_2', 'test1234')
         # create events
-        self.event_1 = Event.objects.create(
-            title='Test event #1',
-            user=self.user_1
-        )
-        self.event_2 = Event.objects.create(
-            title='Test event #2',
-            user=self.user_2
-        )
+        self.event_1 = create_event('Test event #1', self.user_1)
+        self.event_2 = create_event('Test event #2', self.user_2)
 
     def tearDown(self):
         self.browser.quit()
@@ -228,27 +211,12 @@ class DeleteEventTest(LiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
         # create users
-        self.user_1 = User.objects.create_user(
-            username='user_1',
-            password='test1234'
-        )
-        self.user_2 = User.objects.create_user(
-            username='user_2',
-            password='test1234'
-        )
+        self.user_1 = create_user('user_1', 'test1234')
+        self.user_2 = create_user('user_2', 'test1234')
         # create events
-        self.event_1 = Event.objects.create(
-            title='Test event #1',
-            user=self.user_1
-        )
-        self.event_2 = Event.objects.create(
-            title='Test event #2',
-            user=self.user_1
-        )
-        self.event_3 = Event.objects.create(
-            title='Test event #3',
-            user=self.user_2
-        )
+        self.event_1 = create_event('Test event #1', self.user_1)
+        self.event_2 = create_event('Test event #2', self.user_1)
+        self.event_3 = create_event('Test event #3', self.user_2)
 
     def tearDown(self):
         self.browser.quit()
@@ -335,23 +303,11 @@ class UniqueProfilesOwnedEventsTest(LiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
         # create users
-        self.user_1 = User.objects.create_user(
-            username='user_1',
-            password='test1234'
-        )
-        self.user_2 = User.objects.create_user(
-            username='user_2',
-            password='test1234'
-        )
+        self.user_1 = create_user('user_1', 'test1234')
+        self.user_2 = create_user('user_2', 'test1234')
         # create events
-        self.event_1 = Event.objects.create(
-            title='Test event #1',
-            user=self.user_1
-        )
-        self.event_2 = Event.objects.create(
-            title='Test event #2',
-            user=self.user_2
-        )
+        self.event_1 = create_event('Test event #1', self.user_1)
+        self.event_2 = create_event('Test event #2', self.user_2)
 
     def tearDown(self):
         self.browser.quit()
