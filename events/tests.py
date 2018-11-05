@@ -26,7 +26,7 @@ class AuthenticationViewsTest(TestCase):
         self.assertEqual(str(response.context['user']), 'AnonymousUser')
 
     def test_login_redirection(self):
-        response = self.client.get('/login/redirection/')
+        response = self.client.get('/accounts/login/redirection/')
         self.assertRedirects(response, f'/{ self.user.username }')
 
 

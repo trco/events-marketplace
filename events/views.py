@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from .decorators import user_is_event_owner
@@ -13,13 +12,6 @@ def index(request):
     context['events'] = events
 
     return render(request, 'events/index.html', context)
-
-
-def login_redirection(request):
-    return HttpResponseRedirect(reverse(
-        'user_profile',
-        args=[request.user.username])
-    )
 
 
 @login_required

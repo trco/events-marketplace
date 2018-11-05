@@ -1,5 +1,14 @@
 from django.contrib.auth.models import User
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
+from django.urls import reverse
+
+
+def login_redirection(request):
+    return HttpResponseRedirect(reverse(
+        'user_profile',
+        args=[request.user.username])
+    )
 
 
 def signup(request):

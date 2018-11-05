@@ -1,6 +1,7 @@
 from django.urls import path
-from accounts.views import signup
+from accounts.views import login_redirection, signup
 
 urlpatterns = [
-    path('signup/', signup)
+    path('login/redirection/', login_redirection, name='login_redirection'),
+    path('signup/', signup, name='signup')
 ]
