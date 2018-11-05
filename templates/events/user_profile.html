@@ -16,6 +16,9 @@
               <td>
                 <a href="{% url 'update_event' event.id %}" id="id_edit_link">Edit</a>
               </td>
+              <td>
+                <a href="{% url 'delete_event' event.id %}" id="id_delete_btn_{{ event.id }}">Delete</a>
+              </td>
             </tr>
           {% endif %}
         {% endif %}

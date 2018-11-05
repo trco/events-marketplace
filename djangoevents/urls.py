@@ -11,5 +11,7 @@ urlpatterns = [
     path('<str:username>', events_views.user_profile, name='user_profile'),
     path('events/add', events_views.create_event, name='create_event'),
     path('events/edit/<int:event_id>', events_views.update_event,
-         name='update_event')
+         name='update_event'),
+    path('events/delete/<int:event_id>', events_views.delete_event,
+         name='delete_event')
 ]

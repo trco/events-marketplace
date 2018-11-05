@@ -178,12 +178,120 @@ class EditEventTest(LiveServerTestCase):
         # he sees his events
         wait_for_row_in_table(self, 'Test event #1')
 
-        # he tries to edit other user event
+        # he tries to edit other user's event
         self.browser.get(
             self.live_server_url + f'/events/edit/{ self.event_2.id }'
         )
         new_url = self.browser.current_url
         self.assertRegex(new_url, f'/events/edit/{ self.event_2.id }')
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('403 Forbidden', page_text)
+
+
+class DeleteEventTest(LiveServerTestCase):
+
+    def setUp(self):
+        self.browser = webdriver.Firefox()
+        # create users
+        self.user_1 = User.objects.create_user(
+            username='user_1',
+            password='test1234'
+        )
+        self.user_2 = User.objects.create_user(
+            username='user_2',
+            password='test1234'
+        )
+        # create events
+        self.event_1 = Event.objects.create(
+            title='Test event #1',
+            user=self.user_1
+        )
+        self.event_2 = Event.objects.create(
+            title='Test event #2',
+            user=self.user_1
+        )
+        self.event_3 = Event.objects.create(
+            title='Test event #3',
+            user=self.user_2
+        )
+
+    def tearDown(self):
+        self.browser.quit()
+
+    # User story
+    def test_delete_event(self):
+        # user visits login page
+        self.browser.get(self.live_server_url + '/accounts/login')
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, '/accounts/login')
+
+        # he fills out & submits login form
+        username_field = self.browser.find_element_by_id('id_username')
+        password_field = self.browser.find_element_by_id('id_password')
+        username_field.send_keys('user_1')
+        password_field.send_keys('test1234')
+        self.browser.find_element_by_id('id_login_btn').click()
+
+        # he is redirected to his dedicated profile page
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, f'/{ self.user_1.username }')
+        # he sees his events
+        wait_for_row_in_table(self, 'Test event #1')
+        wait_for_row_in_table(self, 'Test event #2')
+
+        # he clicks Delete button
+        self.browser.find_element_by_id(
+            f'id_delete_btn_{ self.event_1.id }'
+        ).click()
+
+        # he is redirected to the page for confirmation of deletion
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, f'/events/delete/{ self.event_1.id }')
+        # he checks page content
+        header_text = self.browser.find_element_by_tag_name('h1').text
+        self.assertIn('Confirm deletion', header_text)
+
+        # he clicks Delete button to confirm deletion
+        self.browser.find_element_by_id('id_delete_btn').click()
+
+        # he is redirected to his dedicated profile page
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, f'/{ self.user_1.username }')
+        # he sees that event was deleted
+        wait_for_row_in_table(self, 'Test event #2')
+
+        # he checks that event was deleted also at index
+        self.browser.get(self.live_server_url)
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, '/')
+        wait_for_row_in_table(self, 'Test event #2')
+
+    def test_user_can_delete_only_his_events(self):
+        # user visits login page
+        self.browser.get(self.live_server_url + '/accounts/login')
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, '/accounts/login')
+
+        # he fills out & submits login form
+        username_field = self.browser.find_element_by_id('id_username')
+        password_field = self.browser.find_element_by_id('id_password')
+        username_field.send_keys('user_1')
+        password_field.send_keys('test1234')
+        self.browser.find_element_by_id('id_login_btn').click()
+
+        # he is redirected to his dedicated profile page
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, f'/{ self.user_1.username }')
+        # he sees his events
+        wait_for_row_in_table(self, 'Test event #1')
+        wait_for_row_in_table(self, 'Test event #2')
+
+        # he tries to delete other user's event
+        self.browser.get(
+            self.live_server_url + f'/events/delete/{ self.event_3.id }'
+        )
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, f'/events/delete/{ self.event_3.id }')
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertIn('403 Forbidden', page_text)
 

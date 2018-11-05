@@ -1,4 +1,5 @@
 db.sqlite3
+todo.txt
 geckodriver.log
 __pycache__
 *.pyc

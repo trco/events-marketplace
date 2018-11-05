@@ -167,6 +167,64 @@ class UpdateEventViewTest(TestCase):
         self.assertEqual(response.status_code, 403)
 
 
+class DeleteEventViewTest(TestCase):
+
+    def setUp(self):
+        # create users
+        self.user_1 = User.objects.create_user(
+            username='user_1',
+            password='test1234'
+        )
+        self.user_2 = User.objects.create_user(
+            username='user_2',
+            password='test1234'
+        )
+        # create events
+        self.event_1 = Event.objects.create(
+            title='Test event #1',
+            user=self.user_1
+        )
+        self.event_2 = Event.objects.create(
+            title='Test event #2',
+            user=self.user_1
+        )
+        self.event_3 = Event.objects.create(
+            title='Test event #3',
+            user=self.user_2
+        )
+        # login
+        self.client.login(username='user_1', password='test1234')
+
+    def test_delete_event_get(self):
+        response = self.client.get(
+            f'/events/delete/{ self.event_1.id }'
+        )
+        self.assertEqual(Event.objects.count(), 3)
+        first_event = Event.objects.first()
+        self.assertEqual(first_event.title, 'Test event #1')
+        self.assertEqual(response.context['event'], self.event_1)
+
+    def test_delete_event_post(self):
+        response = self.client.post(
+            f'/events/delete/{ self.event_1.id }'
+        )
+        self.assertEqual(Event.objects.count(), 2)
+        first_event = Event.objects.first()
+        self.assertEqual(first_event.title, 'Test event #2')
+
+    def test_redirect_after_post(self):
+        response = self.client.post(
+            f'/events/delete/{ self.event_1.id }'
+        )
+        self.assertRedirects(response, f'/{ self.user_1.username }')
+
+    def test_cannot_delete_other_users_event(self):
+        response = self.client.post(
+            f'/events/delete/{ self.event_3.id }'
+        )
+        self.assertEqual(response.status_code, 403)
+
+
 class EventModelTest(TestCase):
 
     def test_create_read_event(self):
