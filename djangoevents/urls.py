@@ -5,6 +5,7 @@ from events import views as events_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/', include('accounts.urls')),
     path('login/redirection/', events_views.login_redirection,
          name='login_redirection'),
     path('', events_views.index, name='index'),

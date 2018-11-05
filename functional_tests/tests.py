@@ -16,15 +16,13 @@ class SignUpTest(LiveServerTestCase):
 
     def test_visitor_can_signup_and_login(self):
         # user visits signup page
-        self.browser.get('/accounts/signup')
+        self.browser.get(self.live_server_url + '/accounts/signup/')
 
         # he fills out & submits signup form
         username_field = self.browser.find_element_by_id('id_username')
         password_field = self.browser.find_element_by_id('id_password')
-        password_2_field = self.browser.find_element_by_id('id_password_2')
         username_field.send_keys('user_1')
         password_field.send_keys('test1234')
-        password_2_field.send_keys('test1234')
         self.browser.find_element_by_id('id_signup_btn').click()
 
         # he is redirected to the login page
@@ -40,7 +38,7 @@ class SignUpTest(LiveServerTestCase):
 
         # he is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/{ self.user_1.username }')
+        self.assertRegex(redirect_url, '/user_1')
         header_text = self.browser.find_element_by_tag_name('h1').text
         self.assertIn('User profile', header_text)
 
