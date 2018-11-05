@@ -18,3 +18,30 @@ class SignUpViewTest(TestCase):
             data={'username': 'user_1', 'password': 'test1234'}
         )
         self.assertRedirects(response, '/accounts/login/')
+
+
+class AuthenticationViewsTest(TestCase):
+
+    def setUp(self):
+        # create user
+        self.user = User.objects.create_user(
+            username='user',
+            password='test1234'
+        )
+        # login
+        self.client.login(username='user', password='test1234')
+
+    def test_login_logout(self):
+        response = self.client.get('/')
+        # check that the user is logged in
+        self.assertEqual(str(response.context['user']), 'user')
+
+        # logout
+        response = self.client.logout()
+        response = self.client.get('/')
+        # check that the user is logged out
+        self.assertEqual(str(response.context['user']), 'AnonymousUser')
+
+    def test_login_redirection(self):
+        response = self.client.get('/accounts/login/redirection/')
+        self.assertRedirects(response, f'/{ self.user.username }')

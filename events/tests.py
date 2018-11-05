@@ -3,33 +3,6 @@ from django.test import TestCase
 from .models import Event
 
 
-class AuthenticationViewsTest(TestCase):
-
-    def setUp(self):
-        # create user
-        self.user = User.objects.create_user(
-            username='user',
-            password='test1234'
-        )
-        # login
-        self.client.login(username='user', password='test1234')
-
-    def test_login_logout(self):
-        response = self.client.get('/')
-        # check that the user is logged in
-        self.assertEqual(str(response.context['user']), 'user')
-
-        # logout
-        response = self.client.logout()
-        response = self.client.get('/')
-        # check that the user is logged out
-        self.assertEqual(str(response.context['user']), 'AnonymousUser')
-
-    def test_login_redirection(self):
-        response = self.client.get('/accounts/login/redirection/')
-        self.assertRedirects(response, f'/{ self.user.username }')
-
-
 class IndexViewTest(TestCase):
 
     def test_index_visit(self):
