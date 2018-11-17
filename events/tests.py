@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
 from functional_tests.utils import create_event, create_user
+from .forms import EventForm
 from .models import Event
 
 
@@ -53,6 +54,25 @@ class UserProfileTest(TestCase):
         self.assertContains(response, 'Test event #2')
         self.assertNotContains(response, 'Test event #1')
         self.assertNotContains(response, 'Edit')
+
+
+class CreateEventFormTest(TestCase):
+
+    def setUp(self):
+        # create users
+        self.user_1 = create_user('user_1', 'test1234')
+        # login
+        self.client.login(username='user_1', password='test1234')
+
+    def test_invalid_title_length(self):
+        form = EventForm(data={'title': 'a'*129})
+        self.assertFalse(form.is_valid())
+
+    def test_user_is_set_as_event_user_on_save(self):
+        form = EventForm(data={'title': 'Test event #1'})
+        form.save(user=self.user_1)
+        event = Event.objects.first()
+        self.assertEqual(self.user_1, event.user)
 
 
 class CreateEventViewTest(TestCase):
