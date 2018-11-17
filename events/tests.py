@@ -74,6 +74,12 @@ class CreateEventFormTest(TestCase):
         event = Event.objects.first()
         self.assertEqual(self.user_1, event.user)
 
+    def test_form_handles_saving_to_database(self):
+        form = EventForm(data={'title': 'Test event #1'})
+        new_event = form.save(user=self.user_1)
+        event = Event.objects.first()
+        self.assertEqual(new_event, event)
+
 
 class CreateEventViewTest(TestCase):
 
@@ -83,10 +89,14 @@ class CreateEventViewTest(TestCase):
         # login
         self.client.login(username='user_1', password='test1234')
 
+    def test_displays_event_form(self):
+        response = self.client.get('/events/add')
+        self.assertIsInstance(response.context['form'], EventForm)
+
     def test_create_event_post(self):
         response = self.client.post(
             '/events/add',
-            data={'title_text': 'Test title #1'}
+            data={'title': 'Test title #1'}
         )
         self.assertEqual(Event.objects.count(), 1)
         new_event = Event.objects.first()
@@ -95,7 +105,7 @@ class CreateEventViewTest(TestCase):
     def test_redirect_after_post(self):
         response = self.client.post(
             '/events/add',
-            data={'title_text': 'Test title #1'}
+            data={'title': 'Test title #1'}
         )
         self.assertRedirects(response, f'/{ self.user_1.username }')
 
@@ -112,10 +122,14 @@ class UpdateEventViewTest(TestCase):
         # login
         self.client.login(username='user_1', password='test1234')
 
+    def test_displays_event_form(self):
+        response = self.client.get(f'/events/edit/{ self.event_1.id }')
+        self.assertIsInstance(response.context['form'], EventForm)
+
     def test_update_event_post(self):
         response = self.client.post(
             f'/events/edit/{ self.event_1.id }',
-            data={'title_text': 'Test title #2'}
+            data={'title': 'Test title #2'}
         )
         self.assertEqual(Event.objects.count(), 2)
         updated_event = Event.objects.first()
@@ -124,7 +138,7 @@ class UpdateEventViewTest(TestCase):
     def test_redirect_after_post(self):
         response = self.client.post(
             f'/events/edit/{ self.event_1.id }',
-            data={'title_text': 'Test title #2'}
+            data={'title': 'Test title #2'}
         )
         self.assertRedirects(response, f'/{ self.user_1.username }')
 

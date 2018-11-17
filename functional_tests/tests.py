@@ -84,8 +84,6 @@ class AddEventTest(LiveServerTestCase):
         # he fills out & submits CreateEvent form
         title_field = self.browser.find_element_by_id('id_title')
         title_field.send_keys('Test event #1')
-        user_field = self.browser.find_element_by_id('id_user')
-        user_field.send_keys('1')
         submit_btn = self.browser.find_element_by_id('id_submit_btn').click()
 
         # he is redirected to his dedicated profile page
@@ -100,8 +98,6 @@ class AddEventTest(LiveServerTestCase):
         # he fills out & submits CreateEvent form once more
         title_field = self.browser.find_element_by_id('id_title')
         title_field.send_keys('Test event #2')
-        user_field = self.browser.find_element_by_id('id_user')
-        user_field.send_keys('1')
         submit_btn = self.browser.find_element_by_id('id_submit_btn').click()
 
         # he is redirected to his dedicated profile page
@@ -162,6 +158,8 @@ class EditEventTest(LiveServerTestCase):
 
         # he updates event
         form_field = self.browser.find_element_by_id('id_title')
+        # he clears the field
+        form_field.clear()
         form_field.send_keys('Test event #2')
         submit_btn = self.browser.find_element_by_id('id_submit_btn').click()
 

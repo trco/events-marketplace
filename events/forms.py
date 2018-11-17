@@ -8,6 +8,7 @@ class EventForm(forms.ModelForm):
         model = Event
         fields = ('title',)
 
-    def save(self, user, *args, **kwargs):
-        self.instance.user = user
-        super().save(*args, **kwargs)
+    def save(self, *args, user=None, **kwargs):
+        if user is not None:
+            self.instance.user = user
+        return super().save(*args, **kwargs)
