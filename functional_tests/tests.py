@@ -1,10 +1,9 @@
-from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from .utils import create_event, create_user, wait_for_row_in_table
+from .base import FunctionalTest
 
 
-class SignUpTest(LiveServerTestCase):
+class SignUpTest(FunctionalTest):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -28,11 +27,7 @@ class SignUpTest(LiveServerTestCase):
         self.assertRegex(redirect_url, '/accounts/login')
 
         # he can login with newly created account
-        username_field = self.browser.find_element_by_id('id_username')
-        password_field = self.browser.find_element_by_id('id_password')
-        username_field.send_keys('user_1')
-        password_field.send_keys('test1234')
-        self.browser.find_element_by_id('id_login_btn').click()
+        self.login_user('user_1', 'test1234')
 
         # he is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
@@ -41,12 +36,12 @@ class SignUpTest(LiveServerTestCase):
         self.assertIn('User profile', header_text)
 
 
-class AddEventTest(LiveServerTestCase):
+class AddEventTest(FunctionalTest):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
         # create user
-        self.user = create_user('user', 'test1234')
+        self.user = self.create_user('user_1', 'test1234')
 
     def tearDown(self):
         self.browser.quit()
@@ -67,11 +62,7 @@ class AddEventTest(LiveServerTestCase):
         self.assertRegex(redirect_url, '/accounts/login')
 
         # he fills out & submits login form
-        username_field = self.browser.find_element_by_id('id_username')
-        password_field = self.browser.find_element_by_id('id_password')
-        username_field.send_keys('user')
-        password_field.send_keys('test1234')
-        self.browser.find_element_by_id('id_login_btn').click()
+        self.login_user('user_1', 'test1234')
 
         # he is redirected to the page with CreateEvent form
         redirect_url = self.browser.current_url
@@ -90,7 +81,7 @@ class AddEventTest(LiveServerTestCase):
         redirect_url = self.browser.current_url
         self.assertRegex(redirect_url, f'/{ self.user.username }')
         # he sees created event
-        wait_for_row_in_table(self, 'Test event #1')
+        self.wait_for_row_in_table('Test event #1')
 
         # he visits Add Event page again
         self.browser.get(self.live_server_url + '/events/add')
@@ -104,28 +95,28 @@ class AddEventTest(LiveServerTestCase):
         redirect_url = self.browser.current_url
         self.assertRegex(redirect_url, f'/{ self.user.username }')
         # he sees both created events
-        wait_for_row_in_table(self, 'Test event #1')
-        wait_for_row_in_table(self, 'Test event #2')
+        self.wait_for_row_in_table('Test event #1')
+        self.wait_for_row_in_table('Test event #2')
 
         # he checks that both events are published at index
         self.browser.get(self.live_server_url)
         new_url = self.browser.current_url
         self.assertRegex(new_url, '/')
         # he sees all his published events
-        wait_for_row_in_table(self, 'Test event #1')
-        wait_for_row_in_table(self, 'Test event #2')
+        self.wait_for_row_in_table('Test event #1')
+        self.wait_for_row_in_table('Test event #2')
 
 
-class EditEventTest(LiveServerTestCase):
+class EditEventTest(FunctionalTest):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
         # create users
-        self.user_1 = create_user('user_1', 'test1234')
-        self.user_2 = create_user('user_2', 'test1234')
+        self.user_1 = self.create_user('user_1', 'test1234')
+        self.user_2 = self.create_user('user_2', 'test1234')
         # create events
-        self.event_1 = create_event('Test event #1', self.user_1)
-        self.event_2 = create_event('Test event #2', self.user_2)
+        self.event_1 = self.create_event('Test event #1', self.user_1)
+        self.event_2 = self.create_event('Test event #2', self.user_2)
 
     def tearDown(self):
         self.browser.quit()
@@ -137,17 +128,13 @@ class EditEventTest(LiveServerTestCase):
         self.assertRegex(new_url, '/accounts/login')
 
         # he fills out & submits login form
-        username_field = self.browser.find_element_by_id('id_username')
-        password_field = self.browser.find_element_by_id('id_password')
-        username_field.send_keys('user_1')
-        password_field.send_keys('test1234')
-        self.browser.find_element_by_id('id_login_btn').click()
+        self.login_user('user_1', 'test1234')
 
         # he is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
         self.assertRegex(redirect_url, f'/{ self.user_1.username }')
         # he sees his events
-        wait_for_row_in_table(self, 'Test event #1')
+        self.wait_for_row_in_table('Test event #1')
 
         # he clicks Edit button to edit event
         self.browser.find_element_by_id('id_edit_link').click()
@@ -167,13 +154,13 @@ class EditEventTest(LiveServerTestCase):
         redirect_url = self.browser.current_url
         self.assertRegex(redirect_url, f'/{ self.user_1.username }')
         # he sees updated event
-        wait_for_row_in_table(self, 'Test event #2')
+        self.wait_for_row_in_table('Test event #2')
 
         # he checks that event is udpated at index
         self.browser.get(self.live_server_url)
         new_url = self.browser.current_url
         self.assertRegex(new_url, '/')
-        wait_for_row_in_table(self, 'Test event #2')
+        self.wait_for_row_in_table('Test event #2')
 
     def test_user_can_edit_only_his_events(self):
         # user visits login page
@@ -182,17 +169,13 @@ class EditEventTest(LiveServerTestCase):
         self.assertRegex(new_url, '/accounts/login')
 
         # he fills out & submits login form
-        username_field = self.browser.find_element_by_id('id_username')
-        password_field = self.browser.find_element_by_id('id_password')
-        username_field.send_keys('user_1')
-        password_field.send_keys('test1234')
-        self.browser.find_element_by_id('id_login_btn').click()
+        self.login_user('user_1', 'test1234')
 
         # he is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
         self.assertRegex(redirect_url, f'/{ self.user_1.username }')
         # he sees his events
-        wait_for_row_in_table(self, 'Test event #1')
+        self.wait_for_row_in_table('Test event #1')
 
         # he tries to edit other user's event
         self.browser.get(
@@ -204,17 +187,17 @@ class EditEventTest(LiveServerTestCase):
         self.assertIn('403 Forbidden', page_text)
 
 
-class DeleteEventTest(LiveServerTestCase):
+class DeleteEventTest(FunctionalTest):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
         # create users
-        self.user_1 = create_user('user_1', 'test1234')
-        self.user_2 = create_user('user_2', 'test1234')
+        self.user_1 = self.create_user('user_1', 'test1234')
+        self.user_2 = self.create_user('user_2', 'test1234')
         # create events
-        self.event_1 = create_event('Test event #1', self.user_1)
-        self.event_2 = create_event('Test event #2', self.user_1)
-        self.event_3 = create_event('Test event #3', self.user_2)
+        self.event_1 = self.create_event('Test event #1', self.user_1)
+        self.event_2 = self.create_event('Test event #2', self.user_1)
+        self.event_3 = self.create_event('Test event #3', self.user_2)
 
     def tearDown(self):
         self.browser.quit()
@@ -226,18 +209,14 @@ class DeleteEventTest(LiveServerTestCase):
         self.assertRegex(new_url, '/accounts/login')
 
         # he fills out & submits login form
-        username_field = self.browser.find_element_by_id('id_username')
-        password_field = self.browser.find_element_by_id('id_password')
-        username_field.send_keys('user_1')
-        password_field.send_keys('test1234')
-        self.browser.find_element_by_id('id_login_btn').click()
+        self.login_user('user_1', 'test1234')
 
         # he is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
         self.assertRegex(redirect_url, f'/{ self.user_1.username }')
         # he sees his events
-        wait_for_row_in_table(self, 'Test event #1')
-        wait_for_row_in_table(self, 'Test event #2')
+        self.wait_for_row_in_table('Test event #1')
+        self.wait_for_row_in_table('Test event #2')
 
         # he clicks Delete button
         self.browser.find_element_by_id(
@@ -258,13 +237,13 @@ class DeleteEventTest(LiveServerTestCase):
         redirect_url = self.browser.current_url
         self.assertRegex(redirect_url, f'/{ self.user_1.username }')
         # he sees that event was deleted
-        wait_for_row_in_table(self, 'Test event #2')
+        self.wait_for_row_in_table('Test event #2')
 
         # he checks that event was deleted also at index
         self.browser.get(self.live_server_url)
         new_url = self.browser.current_url
         self.assertRegex(new_url, '/')
-        wait_for_row_in_table(self, 'Test event #2')
+        self.wait_for_row_in_table('Test event #2')
 
     def test_user_can_delete_only_his_events(self):
         # user visits login page
@@ -273,18 +252,14 @@ class DeleteEventTest(LiveServerTestCase):
         self.assertRegex(new_url, '/accounts/login')
 
         # he fills out & submits login form
-        username_field = self.browser.find_element_by_id('id_username')
-        password_field = self.browser.find_element_by_id('id_password')
-        username_field.send_keys('user_1')
-        password_field.send_keys('test1234')
-        self.browser.find_element_by_id('id_login_btn').click()
+        self.login_user('user_1', 'test1234')
 
         # he is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
         self.assertRegex(redirect_url, f'/{ self.user_1.username }')
         # he sees his events
-        wait_for_row_in_table(self, 'Test event #1')
-        wait_for_row_in_table(self, 'Test event #2')
+        self.wait_for_row_in_table('Test event #1')
+        self.wait_for_row_in_table('Test event #2')
 
         # he tries to delete other user's event
         self.browser.get(
@@ -296,16 +271,16 @@ class DeleteEventTest(LiveServerTestCase):
         self.assertIn('403 Forbidden', page_text)
 
 
-class UniqueProfilesOwnedEventsTest(LiveServerTestCase):
+class UniqueProfilesOwnedEventsTest(FunctionalTest):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
         # create users
-        self.user_1 = create_user('user_1', 'test1234')
-        self.user_2 = create_user('user_2', 'test1234')
+        self.user_1 = self.create_user('user_1', 'test1234')
+        self.user_2 = self.create_user('user_2', 'test1234')
         # create events
-        self.event_1 = create_event('Test event #1', self.user_1)
-        self.event_2 = create_event('Test event #2', self.user_2)
+        self.event_1 = self.create_event('Test event #1', self.user_1)
+        self.event_2 = self.create_event('Test event #2', self.user_2)
 
     def tearDown(self):
         self.browser.quit()
@@ -317,11 +292,7 @@ class UniqueProfilesOwnedEventsTest(LiveServerTestCase):
         self.assertRegex(new_url, '/accounts/login')
 
         # he fills out & submits login form
-        username_field = self.browser.find_element_by_id('id_username')
-        password_field = self.browser.find_element_by_id('id_password')
-        username_field.send_keys('user_1')
-        password_field.send_keys('test1234')
-        self.browser.find_element_by_id('id_login_btn').click()
+        self.login_user('user_1', 'test1234')
 
         # he is redirected to his dedicated profile page
         redirect_url_1 = self.browser.current_url
@@ -340,11 +311,7 @@ class UniqueProfilesOwnedEventsTest(LiveServerTestCase):
         self.assertRegex(new_url, '/accounts/login')
 
         # he fills out & submits login form
-        username_field = self.browser.find_element_by_id('id_username')
-        password_field = self.browser.find_element_by_id('id_password')
-        username_field.send_keys('user_2')
-        password_field.send_keys('test1234')
-        self.browser.find_element_by_id('id_login_btn').click()
+        self.login_user('user_2', 'test1234')
 
         # he is redirected to his dedicated profile page
         redirect_url_2 = self.browser.current_url
@@ -363,11 +330,7 @@ class UniqueProfilesOwnedEventsTest(LiveServerTestCase):
         self.assertRegex(new_url, '/accounts/login')
 
         # he fills out & submits login form
-        username_field = self.browser.find_element_by_id('id_username')
-        password_field = self.browser.find_element_by_id('id_password')
-        username_field.send_keys('user_1')
-        password_field.send_keys('test1234')
-        self.browser.find_element_by_id('id_login_btn').click()
+        self.login_user('user_1', 'test1234')
 
         # he is redirected to his dedicated profile page
         redirect_url_1 = self.browser.current_url
