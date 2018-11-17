@@ -1,11 +1,10 @@
 from django.contrib.auth.models import User
-from django.test import TestCase
-from functional_tests.utils import create_event, create_user
-from .forms import EventForm
-from .models import Event
+from events.forms import EventForm
+from events.models import Event
+from .base import CustomTestCase
 
 
-class IndexViewTest(TestCase):
+class IndexViewTest(CustomTestCase):
 
     def test_index_visit(self):
         response = self.client.get('/')
@@ -32,15 +31,15 @@ class IndexViewTest(TestCase):
         self.assertContains(response, 'Test event #2')
 
 
-class UserProfileTest(TestCase):
+class UserProfileTest(CustomTestCase):
 
     def setUp(self):
         # create users
-        self.user_1 = create_user('user_1', 'test1234')
-        self.user_2 = create_user('user_2', 'test1234')
+        self.user_1 = self.create_user('user_1', 'test1234')
+        self.user_2 = self.create_user('user_2', 'test1234')
         # create events
-        self.event_1 = create_event('Test event #1', self.user_1)
-        self.event_2 = create_event('Test event #2', self.user_2)
+        self.event_1 = self.create_event('Test event #1', self.user_1)
+        self.event_2 = self.create_event('Test event #2', self.user_2)
         # login
         self.client.login(username='user_1', password='test1234')
 
@@ -56,32 +55,7 @@ class UserProfileTest(TestCase):
         self.assertNotContains(response, 'Edit')
 
 
-class CreateEventFormTest(TestCase):
-
-    def setUp(self):
-        # create users
-        self.user_1 = create_user('user_1', 'test1234')
-        # login
-        self.client.login(username='user_1', password='test1234')
-
-    def test_invalid_title_length(self):
-        form = EventForm(data={'title': 'a'*129})
-        self.assertFalse(form.is_valid())
-
-    def test_user_is_set_as_event_user_on_save(self):
-        form = EventForm(data={'title': 'Test event #1'})
-        form.save(user=self.user_1)
-        event = Event.objects.first()
-        self.assertEqual(self.user_1, event.user)
-
-    def test_form_handles_saving_to_database(self):
-        form = EventForm(data={'title': 'Test event #1'})
-        new_event = form.save(user=self.user_1)
-        event = Event.objects.first()
-        self.assertEqual(new_event, event)
-
-
-class CreateEventViewTest(TestCase):
+class CreateEventViewTest(CustomTestCase):
 
     def post_data(self, title):
         return self.client.post(
@@ -91,7 +65,7 @@ class CreateEventViewTest(TestCase):
 
     def setUp(self):
         # create users
-        self.user_1 = create_user('user_1', 'test1234')
+        self.user_1 = self.create_user('user_1', 'test1234')
         # login
         self.client.login(username='user_1', password='test1234')
 
@@ -127,7 +101,7 @@ class CreateEventViewTest(TestCase):
         self.assertRedirects(response, f'/{ self.user_1.username }')
 
 
-class UpdateEventViewTest(TestCase):
+class UpdateEventViewTest(CustomTestCase):
 
     def post_data(self, event_id, title):
         return self.client.post(
@@ -137,11 +111,11 @@ class UpdateEventViewTest(TestCase):
 
     def setUp(self):
         # create users
-        self.user_1 = create_user('user_1', 'test1234')
-        self.user_2 = create_user('user_2', 'test1234')
+        self.user_1 = self.create_user('user_1', 'test1234')
+        self.user_2 = self.create_user('user_2', 'test1234')
         # create events
-        self.event_1 = create_event('Test event #1', self.user_1)
-        self.event_2 = create_event('Test event #2', self.user_2)
+        self.event_1 = self.create_event('Test event #1', self.user_1)
+        self.event_2 = self.create_event('Test event #2', self.user_2)
         # login
         self.client.login(username='user_1', password='test1234')
 
@@ -164,7 +138,7 @@ class UpdateEventViewTest(TestCase):
         self.assertEqual(response.status_code, 403)
 
 
-class DeleteEventViewTest(TestCase):
+class DeleteEventViewTest(CustomTestCase):
 
     def delete_post(self, event_id):
         return self.client.post(
@@ -173,12 +147,12 @@ class DeleteEventViewTest(TestCase):
 
     def setUp(self):
         # create users
-        self.user_1 = create_user('user_1', 'test1234')
-        self.user_2 = create_user('user_2', 'test1234')
+        self.user_1 = self.create_user('user_1', 'test1234')
+        self.user_2 = self.create_user('user_2', 'test1234')
         # create events
-        self.event_1 = create_event('Test event #1', self.user_1)
-        self.event_2 = create_event('Test event #2', self.user_1)
-        self.event_3 = create_event('Test event #3', self.user_2)
+        self.event_1 = self.create_event('Test event #1', self.user_1)
+        self.event_2 = self.create_event('Test event #2', self.user_1)
+        self.event_3 = self.create_event('Test event #3', self.user_2)
         # login
         self.client.login(username='user_1', password='test1234')
 
@@ -204,26 +178,3 @@ class DeleteEventViewTest(TestCase):
     def test_cannot_delete_other_users_event(self):
         response = response = self.delete_post(self.event_3.id)
         self.assertEqual(response.status_code, 403)
-
-
-class EventModelTest(TestCase):
-
-    def test_create_read_event(self):
-        # create events
-        event_one = Event()
-        event_one.title = 'Test event #1'
-        event_one.save()
-
-        event_two = Event()
-        event_two.title = 'Test event #2'
-        event_two.save()
-
-        # read events
-        events = Event.objects.all()
-        self.assertEqual(events.count(), 2)
-
-        saved_event_one = events[0]
-        saved_event_two = events[1]
-
-        self.assertIn('Test event #1', saved_event_one.title)
-        self.assertIn('Test event #2', saved_event_two.title)
