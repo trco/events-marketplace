@@ -83,6 +83,12 @@ class CreateEventFormTest(TestCase):
 
 class CreateEventViewTest(TestCase):
 
+    def post_data(self, title):
+        return self.client.post(
+            '/events/add',
+            data={'title': title}
+        )
+
     def setUp(self):
         # create users
         self.user_1 = create_user('user_1', 'test1234')
@@ -93,24 +99,41 @@ class CreateEventViewTest(TestCase):
         response = self.client.get('/events/add')
         self.assertIsInstance(response.context['form'], EventForm)
 
-    def test_create_event_post(self):
-        response = self.client.post(
-            '/events/add',
-            data={'title': 'Test title #1'}
+    def test_invalid_input_returns_form_to_template(self):
+        response = self.post_data('a'*129)
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.context['form'], EventForm)
+
+    def test_invalid_input_returns_error_to_the_form_in_template(self):
+        response = self.post_data('a'*129)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'Ensure this value has at most 128 characters (it has 129).'
         )
+
+    def test_invalid_input_doesnt_save_to_database(self):
+        response = self.post_data('a'*129)
+        self.assertEqual(Event.objects.count(), 0)
+
+    def test_create_event_post(self):
+        response = self.post_data('Test title #1')
         self.assertEqual(Event.objects.count(), 1)
         new_event = Event.objects.first()
         self.assertEqual(new_event.title, 'Test title #1')
 
     def test_redirect_after_post(self):
-        response = self.client.post(
-            '/events/add',
-            data={'title': 'Test title #1'}
-        )
+        response = self.post_data('Test title #1')
         self.assertRedirects(response, f'/{ self.user_1.username }')
 
 
 class UpdateEventViewTest(TestCase):
+
+    def post_data(self, event_id, title):
+        return self.client.post(
+            f'/events/edit/{ event_id }',
+            data={'title': title}
+        )
 
     def setUp(self):
         # create users
@@ -127,30 +150,26 @@ class UpdateEventViewTest(TestCase):
         self.assertIsInstance(response.context['form'], EventForm)
 
     def test_update_event_post(self):
-        response = self.client.post(
-            f'/events/edit/{ self.event_1.id }',
-            data={'title': 'Test title #2'}
-        )
+        response = self.post_data(self.event_1.id, 'Test title #2')
         self.assertEqual(Event.objects.count(), 2)
         updated_event = Event.objects.first()
         self.assertEqual(updated_event.title, 'Test title #2')
 
     def test_redirect_after_post(self):
-        response = self.client.post(
-            f'/events/edit/{ self.event_1.id }',
-            data={'title': 'Test title #2'}
-        )
+        response = self.post_data(self.event_1.id, 'Test title #2')
         self.assertRedirects(response, f'/{ self.user_1.username }')
 
     def test_cannot_update_other_users_event(self):
-        response = self.client.post(
-            f'/events/edit/{ self.event_2.id }',
-            data={'title_text': 'Test title #3'}
-        )
+        response = self.post_data(self.event_2.id, 'Test title #3')
         self.assertEqual(response.status_code, 403)
 
 
 class DeleteEventViewTest(TestCase):
+
+    def delete_post(self, event_id):
+        return self.client.post(
+            f'/events/delete/{ event_id }'
+        )
 
     def setUp(self):
         # create users
@@ -173,23 +192,17 @@ class DeleteEventViewTest(TestCase):
         self.assertEqual(response.context['event'], self.event_1)
 
     def test_delete_event_post(self):
-        response = self.client.post(
-            f'/events/delete/{ self.event_1.id }'
-        )
+        response = response = self.delete_post(self.event_1.id)
         self.assertEqual(Event.objects.count(), 2)
         first_event = Event.objects.first()
         self.assertEqual(first_event.title, 'Test event #2')
 
     def test_redirect_after_post(self):
-        response = self.client.post(
-            f'/events/delete/{ self.event_1.id }'
-        )
+        response = response = self.delete_post(self.event_1.id)
         self.assertRedirects(response, f'/{ self.user_1.username }')
 
     def test_cannot_delete_other_users_event(self):
-        response = self.client.post(
-            f'/events/delete/{ self.event_3.id }'
-        )
+        response = response = self.delete_post(self.event_3.id)
         self.assertEqual(response.status_code, 403)
 
 
