@@ -6,14 +6,15 @@ from django.urls import reverse
 
 def login_redirection(request):
     return HttpResponseRedirect(reverse(
-        'user_profile',
-        args=[request.user.username])
+            'user_profile',
+            args=[request.user.username]
+        )
     )
 
 
 def signup(request):
     if request.method == 'POST':
-        user = User.objects.create_user(
+        User.objects.create_user(
             username=request.POST.get('username'),
             password=request.POST.get('password')
         )
