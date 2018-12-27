@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from .decorators import user_is_event_owner
 from .forms import EventForm
@@ -31,9 +31,8 @@ def create_event(request):
 
     if form.is_valid():
         form.save(user=request.user)
-        return HttpResponseRedirect(reverse(
-            'user_profile',
-            args=[request.user.username])
+        return HttpResponseRedirect(
+            reverse('user_profile',  args=[request.user.username])
         )
 
     events = Event.objects.all()
@@ -53,9 +52,8 @@ def update_event(request, event_id):
 
     if form.is_valid():
         form.save()
-        return HttpResponseRedirect(reverse(
-            'user_profile',
-            args=[request.user.username])
+        return HttpResponseRedirect(
+            reverse('user_profile', args=[request.user.username])
         )
 
     context['form'] = form
@@ -67,16 +65,15 @@ def update_event(request, event_id):
 @login_required
 @user_is_event_owner
 def delete_event(request, event_id):
+    context = {}
     event = get_object_or_404(Event, id=event_id)
 
     if request.method == 'POST':
         event.delete()
-        return HttpResponseRedirect(reverse(
-            'user_profile',
-            args=[request.user.username])
+        return HttpResponseRedirect(
+            reverse('user_profile', args=[request.user.username])
         )
 
-    context = {}
     context['event'] = event
 
     return render(request, 'events/delete_event.html', context)
