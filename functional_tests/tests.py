@@ -36,7 +36,7 @@ class SignUpTest(FunctionalTest):
         self.assertIn('User profile', header_text)
 
 
-class AddEventTest(FunctionalTest):
+class CreateEventTest(FunctionalTest):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -107,7 +107,7 @@ class AddEventTest(FunctionalTest):
         self.wait_for_row_in_table('Test event #2')
 
 
-class EditEventTest(FunctionalTest):
+class UpdateEventTest(FunctionalTest):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -348,3 +348,31 @@ class UniqueProfilesOwnedEventsTest(FunctionalTest):
         self.assertIn('Test event #2', page_text)
         self.assertNotIn('Test event #1', page_text)
         self.assertNotIn('Edit', page_text)
+
+
+class EventDetailsTest(FunctionalTest):
+
+    def setUp(self):
+        self.browser = webdriver.Firefox()
+        # create user
+        self.user = self.create_user('user', 'test1234')
+        # create event
+        self.event = self.create_event('Test event #1', self.user)
+
+    def tearDown(self):
+        self.browser.quit()
+
+    def test_visit_index_visit_event_details(self):
+        # user visits the index page
+        self.browser.get(self.live_server_url)
+
+        # he clicks event title to visit event details page
+        self.browser.find_element_by_link_text(self.event.title).click()
+
+        # he is redirected to event details page
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, f'/event/{ self.event.id }')
+
+        # he checks page content
+        event_title = self.browser.find_element_by_tag_name('h1').text
+        self.assertIn('Test event #1', event_title)

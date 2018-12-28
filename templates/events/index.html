@@ -9,7 +9,7 @@
     <table id="id_event_table">
       {% for event in events %}
         <tr>
-          <td>{{ event.title }}</td>
+          <td><a href="/event/{{ event.id }}">{{ event.title }}</a></td>
         </tr>
       {% endfor %}
     </table>

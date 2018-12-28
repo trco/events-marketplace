@@ -40,7 +40,7 @@ class FunctionalTest(LiveServerTestCase):
                 return
             except (AssertionError, WebDriverException) as e:
                 # return exception if more than 10s pass
-                if time.time() - start_time > 10:
+                if time.time() - start_time > MAX_WAIT:
                     raise e
                 # wait for 0.5s and retry
                 time.sleep(0.5)

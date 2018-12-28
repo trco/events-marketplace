@@ -24,6 +24,14 @@ def user_profile(request, username=None):
     return render(request, 'events/user_profile.html', context)
 
 
+def event_details(request, event_id):
+    context = {}
+    event = get_object_or_404(Event, id=event_id)
+    context['event'] = event
+
+    return render(request, 'events/event_details.html', context)
+
+
 @login_required
 def create_event(request):
     context = {}

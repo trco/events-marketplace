@@ -178,3 +178,21 @@ class DeleteEventViewTest(CustomTestCase):
     def test_cannot_delete_other_users_event(self):
         response = response = self.delete_post(self.event_3.id)
         self.assertEqual(response.status_code, 403)
+
+
+class EventDetailsViewTest(CustomTestCase):
+
+    def setUp(self):
+        # create user
+        self.user = self.create_user('user', 'test1234')
+        # create event
+        self.event_1 = self.create_event('Test event #1', self.user)
+        self.event_2 = self.create_event('Test event #2', self.user)
+
+    def test_event_details_visit(self):
+        response = self.client.get(f'/event/{ self.event_1.id }')
+        self.assertContains(response, 'Test event #1')
+        self.assertNotContains(response, 'Test event #2')
+        response = self.client.get(f'/event/{ self.event_2.id }')
+        self.assertContains(response, 'Test event #2')
+        self.assertNotContains(response, 'Test event #1')
