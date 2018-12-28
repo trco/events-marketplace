@@ -95,6 +95,7 @@ class CreateEventViewTest(CustomTestCase):
         self.assertEqual(Event.objects.count(), 1)
         new_event = Event.objects.first()
         self.assertEqual(new_event.title, 'Test title #1')
+        self.assertEqual(new_event.user_id, self.user_1.id)
 
     def test_redirect_after_post(self):
         response = self.post_data('Test title #1')
@@ -190,9 +191,9 @@ class EventDetailsViewTest(CustomTestCase):
         self.event_2 = self.create_event('Test event #2', self.user)
 
     def test_event_details_visit(self):
-        response = self.client.get(f'/event/{ self.event_1.id }')
+        response = self.client.get(f'/events/{ self.event_1.id }')
         self.assertContains(response, 'Test event #1')
         self.assertNotContains(response, 'Test event #2')
-        response = self.client.get(f'/event/{ self.event_2.id }')
+        response = self.client.get(f'/events/{ self.event_2.id }')
         self.assertContains(response, 'Test event #2')
         self.assertNotContains(response, 'Test event #1')

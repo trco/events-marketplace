@@ -10,6 +10,11 @@
         <tr>
           <td>{{ event.title }}</td>
         </tr>
+        <tr>
+          {% for ticket in event.ticket_set.all %}
+            <td>{{ ticket.name }}</td>
+          {% endfor %}
+        </tr>
         {% if user.is_authenticated %}
           {% if event.user.username == user.username %}
             <tr>
@@ -18,6 +23,9 @@
               </td>
               <td>
                 <a href="{% url 'delete_event' event.id %}" id="id_delete_btn_{{ event.id }}">Delete</a>
+              </td>
+              <td>
+                <a href="{% url 'create_ticket' event.id %}" id="id_add_tickets">Add Tickets</a>
               </td>
             </tr>
           {% endif %}

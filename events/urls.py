@@ -7,7 +7,7 @@ urlpatterns = [
          name='index'),
     path('<str:username>', events_views.user_profile,
          name='user_profile'),
-    path('event/<int:event_id>', events_views.event_details,
+    path('events/<int:event_id>', events_views.event_details,
          name='event_details'),
     path('events/add', events_views.create_event,
          name='create_event'),
