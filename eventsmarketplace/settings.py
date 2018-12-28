@@ -38,7 +38,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'djangoevents.urls'
+ROOT_URLCONF = 'eventsmarketplace.urls'
 
 TEMPLATES = [
     {
@@ -56,7 +56,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'djangoevents.wsgi.application'
+WSGI_APPLICATION = 'eventsmarketplace.wsgi.application'
 
 
 # Database
