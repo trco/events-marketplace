@@ -7,10 +7,11 @@ from tickets.models import Ticket
 
 
 @login_required
-def create_ticket(request, event_id):
+def manage_tickets(request, event_id):
     context = {}
 
     event = get_object_or_404(Event, id=event_id)
+    tickets = Ticket.objects.filter(event_id=event_id)
 
     if request.method == 'POST':
         Ticket.objects.create(
@@ -18,9 +19,10 @@ def create_ticket(request, event_id):
             event_id=event_id
         )
         return HttpResponseRedirect(
-            reverse('user_profile',  args=[request.user.username])
+            reverse('manage_tickets',  args=[event_id])
         )
 
     context['event'] = event
+    context['tickets'] = tickets
 
-    return render(request, 'tickets/create_update_ticket.html', context)
+    return render(request, 'tickets/manage_tickets.html', context)

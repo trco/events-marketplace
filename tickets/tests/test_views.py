@@ -4,11 +4,11 @@ from tickets.models import Ticket
 from .base import CustomTestCase
 
 
-class CreateTicketViewTest(CustomTestCase):
+class ManageTicketsViewTest(CustomTestCase):
 
     def post_data(self, event_id, name):
         return self.client.post(
-            f'/tickets/add/{ event_id }',
+            f'/tickets/{ event_id }',
             data={'ticket_name': name}
         )
 
@@ -17,8 +17,15 @@ class CreateTicketViewTest(CustomTestCase):
         self.user = self.create_user('user', 'test1234')
         # create event
         self.event = self.create_event('Test event #1', self.user)
+        # create ticket
+        self.ticket = self.create_ticket('Test ticket #1', self.event)
         # login
         self.client.login(username='user', password='test1234')
+
+    def test_manage_tickets_get(self):
+        response = self.client.get(f'/tickets/{ self.event.id }')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test ticket #1')
 
     """
     def test_displays_ticket_form(self):
@@ -44,12 +51,12 @@ class CreateTicketViewTest(CustomTestCase):
     """
 
     def test_create_ticket_post(self):
-        response = self.post_data(self.event.id, 'Test ticket')
-        self.assertEqual(Ticket.objects.count(), 1)
-        new_ticket = Ticket.objects.first()
-        self.assertEqual(new_ticket.name, 'Test ticket')
+        response = self.post_data(self.event.id, 'Test ticket #2')
+        self.assertEqual(Ticket.objects.count(), 2)
+        new_ticket = Ticket.objects.last()
+        self.assertEqual(new_ticket.name, 'Test ticket #2')
         self.assertEqual(new_ticket.event_id, self.event.id)
 
     def test_redirect_after_post(self):
-        response = self.post_data(self.event.id, 'Test ticket')
-        self.assertRedirects(response, f'/{ self.user.username }')
+        response = self.post_data(self.event.id, 'Test ticket #2')
+        self.assertRedirects(response, f'/tickets/{ self.event.id }')

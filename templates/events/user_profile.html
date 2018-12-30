@@ -5,7 +5,7 @@
   </head>
   <body>
     <h1>User profile</h1>
-    <table id="id_event_table">
+    <table id="id_table">
       {% for event in events %}
         <tr>
           <td>{{ event.title }}</td>
@@ -25,7 +25,7 @@
                 <a href="{% url 'delete_event' event.id %}" id="id_delete_btn_{{ event.id }}">Delete</a>
               </td>
               <td>
-                <a href="{% url 'create_ticket' event.id %}" id="id_add_tickets">Add Tickets</a>
+                <a href="{% url 'manage_tickets' event.id %}" id="id_manage_tickets">Manage Tickets</a>
               </td>
             </tr>
           {% endif %}

@@ -378,7 +378,7 @@ class EventDetailsTest(FunctionalTest):
         self.assertIn('Test event #1', event_title)
 
 
-class CreateTicketTest(FunctionalTest):
+class ManageTicketsTest(FunctionalTest):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -390,7 +390,7 @@ class CreateTicketTest(FunctionalTest):
     def tearDown(self):
         self.browser.quit()
 
-    def test_add_ticket(self):
+    def test_create_ticket(self):
         # user visits login page
         self.browser.get(self.live_server_url + '/accounts/login')
         new_url = self.browser.current_url
@@ -405,27 +405,27 @@ class CreateTicketTest(FunctionalTest):
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertIn('Test event #1', page_text)
         self.assertIn('Edit', page_text)
-        self.assertIn('Add Tickets', page_text)
+        self.assertIn('Manage Tickets', page_text)
 
-        # he clicks Add Ticket link
-        self.browser.find_element_by_link_text('Add Tickets').click()
+        # he clicks Manage Ticket link
+        self.browser.find_element_by_link_text('Manage Tickets').click()
 
-        # he is redirected to the page with CreateTicket form
+        # he is redirected to the page for managing tickets
         new_url = self.browser.current_url
-        self.assertRegex(new_url, f'/tickets/add/{ self.event.id }')
+        self.assertRegex(new_url, f'/tickets/{ self.event.id }')
         # he checks page content
         self.assertIn('Events Marketplace', self.browser.title)
         header_text = self.browser.find_element_by_tag_name('h1').text
-        self.assertIn(f'Add Tickets for { self.event.title }', header_text)
+        self.assertIn(f'Manage Tickets for { self.event.title }', header_text)
 
         # he fills out & submits CreateTicket form
         name_field = self.browser.find_element_by_id('id_name')
-        name_field.send_keys('Test ticket')
+        name_field.send_keys('Test ticket #1')
         submit_btn = self.browser.find_element_by_id('id_submit_btn').click()
 
         # he is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/{ self.user.username }')
+        self.assertRegex(redirect_url, f'/tickets/{ self.event.id }')
 
         # he sees created ticket
-        self.wait_for_row_in_table('Test ticket')
+        self.wait_for_row_in_table('Test ticket #1')

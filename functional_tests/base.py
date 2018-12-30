@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.test import LiveServerTestCase
 from selenium.common.exceptions import WebDriverException
 from events.models import Event
+from tickets.models import Ticket
 
 
 class FunctionalTest(LiveServerTestCase):
@@ -27,6 +28,12 @@ class FunctionalTest(LiveServerTestCase):
             user=user
         )
 
+    def create_ticket(self, name, event):
+        return Ticket.objects.create(
+            name=name,
+            event=event
+        )
+
     def wait_for_row_in_table(self, row_text):
         MAX_WAIT = 10
 
@@ -34,7 +41,7 @@ class FunctionalTest(LiveServerTestCase):
         # infinite loop
         while True:
             try:
-                table = self.browser.find_element_by_id('id_event_table')
+                table = self.browser.find_element_by_id('id_table')
                 rows = table.find_elements_by_tag_name('tr')
                 self.assertIn(row_text, [row.text for row in rows])
                 return
