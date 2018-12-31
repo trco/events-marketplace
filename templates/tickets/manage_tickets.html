@@ -7,7 +7,7 @@
     <h1>Manage Tickets for {{ event.title }}</h1>
     <form method="post">
       {% csrf_token %}
-      <input id="id_name" type="text" name="ticket_name">
+      {{ form }}
       <input id="id_submit_btn" type="submit" name="" value="Save">
     </form>
     <table id="id_table">

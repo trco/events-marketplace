@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from events.models import Event
 from .decorators import user_is_ticket_owner
+from .forms import TicketForm
 from .models import Ticket
 
 
@@ -14,15 +15,15 @@ def manage_tickets(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     tickets = Ticket.objects.filter(event_id=event_id)
 
-    if request.method == 'POST':
-        Ticket.objects.create(
-            name=request.POST['ticket_name'],
-            event_id=event_id
-        )
+    form = TicketForm(request.POST or None)
+
+    if form.is_valid():
+        form.save(event=event)
         return HttpResponseRedirect(
             reverse('manage_tickets',  args=[event_id])
         )
 
+    context['form'] = form
     context['event'] = event
     context['tickets'] = tickets
 
