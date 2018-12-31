@@ -167,17 +167,17 @@ class DeleteEventViewTest(CustomTestCase):
         self.assertEqual(response.context['event'], self.event_1)
 
     def test_delete_event_post(self):
-        response = response = self.delete_post(self.event_1.id)
+        response = self.delete_post(self.event_1.id)
         self.assertEqual(Event.objects.count(), 2)
         first_event = Event.objects.first()
         self.assertEqual(first_event.title, 'Test event #2')
 
     def test_redirect_after_post(self):
-        response = response = self.delete_post(self.event_1.id)
+        response = self.delete_post(self.event_1.id)
         self.assertRedirects(response, f'/{ self.user_1.username }')
 
     def test_cannot_delete_other_users_event(self):
-        response = response = self.delete_post(self.event_3.id)
+        response = self.delete_post(self.event_3.id)
         self.assertEqual(response.status_code, 403)
 
 

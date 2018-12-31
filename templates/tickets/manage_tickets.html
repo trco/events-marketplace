@@ -15,6 +15,15 @@
         <tr>
           <td>{{ ticket.name }}</td>
         </tr>
+        {% if user.is_authenticated %}
+          {% if ticket.event.user.username == user.username %}
+            <tr>
+              <td>
+                <a href="{% url 'delete_ticket' ticket.id %}" id="id_delete_btn_{{ ticket.id }}">Delete</a>
+              </td>
+            </tr>
+          {% endif %}
+        {% endif %}
       {% endfor %}
     </table>
   </body>

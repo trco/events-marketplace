@@ -3,7 +3,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from events.models import Event
-from tickets.models import Ticket
+from .decorators import user_is_ticket_owner
+from .models import Ticket
 
 
 @login_required
@@ -26,3 +27,20 @@ def manage_tickets(request, event_id):
     context['tickets'] = tickets
 
     return render(request, 'tickets/manage_tickets.html', context)
+
+
+@login_required
+@user_is_ticket_owner
+def delete_ticket(request, ticket_id):
+    context = {}
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if request.method == 'POST':
+        ticket.delete()
+        return HttpResponseRedirect(
+            reverse('manage_tickets', args=[ticket.event_id])
+        )
+
+    context['ticket'] = ticket
+
+    return render(request, 'tickets/delete_ticket.html', context)

@@ -410,7 +410,7 @@ class ManageTicketsTest(FunctionalTest):
         self.assertIn('Edit', page_text)
         self.assertIn('Manage Tickets', page_text)
 
-        # he clicks Manage Ticket link
+        # he clicks Manage Tickets link
         self.browser.find_element_by_link_text('Manage Tickets').click()
 
         # he is redirected to the page for managing tickets
@@ -441,3 +441,99 @@ class ManageTicketsTest(FunctionalTest):
         self.assertIn('Test event #1', page_text)
         self.assertIn('Test ticket #1', page_text)
         self.assertIn('Test ticket #2', page_text)
+
+
+class DeleteTicketTest(FunctionalTest):
+
+    def setUp(self):
+        self.browser = webdriver.Firefox()
+        # create users
+        self.user_1 = self.create_user('user_1', 'test1234')
+        self.user_2 = self.create_user('user_2', 'test1234')
+        # create events
+        self.event_1 = self.create_event('Test event #1', self.user_1)
+        self.event_2 = self.create_event('Test event #2', self.user_2)
+        # create tickets
+        self.ticket_1 = self.create_ticket('Test ticket #1', self.event_1)
+        self.ticket_2 = self.create_ticket('Test ticket #2', self.event_2)
+
+    def tearDown(self):
+        self.browser.quit()
+
+    def test_delete_ticket(self):
+        # user visits login page
+        self.browser.get(self.live_server_url + '/accounts/login')
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, '/accounts/login')
+
+        # he fills out & submits login form
+        self.login_user('user_1', 'test1234')
+
+        # he is redirected to his dedicated profile page
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, f'/{ self.user_1.username }')
+        # he sees his event and ticket
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('Test event #1', page_text)
+        self.assertIn('Test ticket #1', page_text)
+
+        # he clicks Manage Ticket link
+        self.browser.find_element_by_link_text('Manage Tickets').click()
+
+        # he is redirected to the page for managing tickets
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, f'/tickets/{ self.event_1.id }')
+
+        # he clicks Delete button next to the ticket
+        self.browser.find_element_by_id(
+            f'id_delete_btn_{ self.ticket_1.id }'
+        ).click()
+
+        # he is redirected to the page for confirmation of deletion
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, f'/tickets/delete/{ self.ticket_1.id }')
+        # he checks page content
+        header_text = self.browser.find_element_by_tag_name('h1').text
+        self.assertIn('Confirm deletion', header_text)
+
+        # he clicks Delete button to confirm deletion
+        self.browser.find_element_by_id('id_delete_btn').click()
+
+        # he is redirected to the page for managing tickets
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, f'/tickets/{ self.event_1.id }')
+
+        # he checks that ticket was deleted also at his profile page
+        self.browser.get(self.live_server_url + f'/{ self.user_1.username }')
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, f'{ self.user_1.username }')
+        # he sees his event without ticket
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('Test event #1', page_text)
+        self.assertNotIn('Test ticket #1', page_text)
+
+    def test_user_can_delete_only_his_tickets(self):
+        # user visits login page
+        self.browser.get(self.live_server_url + '/accounts/login')
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, '/accounts/login')
+
+        # he fills out & submits login form
+        self.login_user('user_1', 'test1234')
+
+        # he is redirected to his dedicated profile page
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, f'/{ self.user_1.username }')
+        # he sees his event and ticket
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('Test event #1', page_text)
+        self.assertIn('Test ticket #1', page_text)
+
+        # he tries to delete other user's ticket
+        self.browser.get(
+            self.live_server_url + f'/tickets/delete/{ self.ticket_2.id }'
+        )
+        new_url = self.browser.current_url
+        self.assertRegex(new_url, f'/tickets/delete/{ self.ticket_2.id }')
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('403 Forbidden', page_text)

@@ -1,0 +1,13 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Events Marketplace</title>
+  </head>
+  <body>
+    <h1>Confirm deletion</h1>
+    <form action="{% url 'delete_ticket' ticket.id %}" method="post">
+      {% csrf_token %}
+      <button id="id_delete_btn" type="submit">Delete</button>
+    </form>
+  </body>
+</html>

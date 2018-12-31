@@ -60,3 +60,49 @@ class ManageTicketsViewTest(CustomTestCase):
     def test_redirect_after_post(self):
         response = self.post_data(self.event.id, 'Test ticket #2')
         self.assertRedirects(response, f'/tickets/{ self.event.id }')
+
+
+class DeleteTicketViewTest(CustomTestCase):
+
+    def delete_post(self, ticket_id):
+        return self.client.post(
+            f'/tickets/delete/{ ticket_id }'
+        )
+
+    def setUp(self):
+        # create users
+        self.user_1 = self.create_user('user_1', 'test1234')
+        self.user_2 = self.create_user('user_2', 'test1234')
+        # create events
+        self.event_1 = self.create_event('Test event #1', self.user_1)
+        self.event_2 = self.create_event('Test event #2', self.user_1)
+        self.event_3 = self.create_event('Test event #3', self.user_2)
+        # create events
+        self.ticket_1 = self.create_ticket('Test ticket #1', self.event_1)
+        self.ticket_2 = self.create_ticket('Test ticket #2', self.event_2)
+        self.ticket_3 = self.create_ticket('Test ticket #3', self.event_3)
+        # login
+        self.client.login(username='user_1', password='test1234')
+
+    def test_delete_ticket_get(self):
+        response = self.client.get(
+            f'/tickets/delete/{ self.ticket_1.id }'
+        )
+        self.assertEqual(Ticket.objects.count(), 3)
+        first_ticket = Ticket.objects.first()
+        self.assertEqual(first_ticket.name, 'Test ticket #1')
+        self.assertEqual(response.context['ticket'], self.ticket_1)
+
+    def test_delete_ticket_post(self):
+        response = self.delete_post(self.ticket_1.id)
+        self.assertEqual(Ticket.objects.count(), 2)
+        first_ticket = Ticket.objects.first()
+        self.assertEqual(first_ticket.name, 'Test ticket #2')
+
+    def test_redirect_after_post(self):
+        response = self.delete_post(self.ticket_1.id)
+        self.assertRedirects(response, f'/tickets/{ self.event_1.id }')
+
+    def test_cannot_delete_other_users_ticket(self):
+        response = self.delete_post(self.ticket_3.id)
+        self.assertEqual(response.status_code, 403)
