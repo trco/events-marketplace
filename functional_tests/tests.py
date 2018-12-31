@@ -386,6 +386,8 @@ class ManageTicketsTest(FunctionalTest):
         self.user = self.create_user('user', 'test1234')
         # create event
         self.event = self.create_event('Test event #1', self.user)
+        # create ticket
+        self.ticket = self.create_ticket('Test ticket #1', self.event)
 
     def tearDown(self):
         self.browser.quit()
@@ -404,6 +406,7 @@ class ManageTicketsTest(FunctionalTest):
         self.assertRegex(redirect_url, f'/{ self.user.username }')
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertIn('Test event #1', page_text)
+        self.assertIn('Test ticket #1', page_text)
         self.assertIn('Edit', page_text)
         self.assertIn('Manage Tickets', page_text)
 
@@ -420,12 +423,21 @@ class ManageTicketsTest(FunctionalTest):
 
         # he fills out & submits CreateTicket form
         name_field = self.browser.find_element_by_id('id_name')
-        name_field.send_keys('Test ticket #1')
+        name_field.send_keys('Test ticket #2')
         submit_btn = self.browser.find_element_by_id('id_submit_btn').click()
 
-        # he is redirected to his dedicated profile page
+        # he is redirected to dedicated event tickets page
         redirect_url = self.browser.current_url
         self.assertRegex(redirect_url, f'/tickets/{ self.event.id }')
 
         # he sees created ticket
-        self.wait_for_row_in_table('Test ticket #1')
+        self.wait_for_row_in_table('Test ticket #2')
+
+        # he checks if created ticket is visible at his profile page
+        self.browser.get(self.live_server_url + '/user')
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, f'/{ self.user.username }')
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('Test event #1', page_text)
+        self.assertIn('Test ticket #1', page_text)
+        self.assertIn('Test ticket #2', page_text)
