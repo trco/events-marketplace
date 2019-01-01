@@ -1,5 +1,6 @@
 import os
 
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -15,6 +16,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+GOOGLE_MAPS_API_KEY = ''
+try:
+    from .google_maps_api_key import API_KEY
+    GOOGLE_MAPS_API_KEY = API_KEY
+except ImportError:
+    pass
 
 # Application definition
 

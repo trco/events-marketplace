@@ -3,4 +3,4 @@ todo.txt
 geckodriver.log
 __pycache__
 *.pyc
-GoogleMapsAPI.py
+google_maps_api_key.py
