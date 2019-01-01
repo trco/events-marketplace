@@ -32,7 +32,7 @@ class FunctionalTest(LiveServerTestCase):
         if user is not None:
             # user is redirected to his dedicated profile page
             redirect_url = self.browser.current_url
-            self.assertRegex(redirect_url, f'/{ user.username }')
+            self.assertRegex(redirect_url, f'/{user.username}')
 
     def create_user(self, username, password):
         return User.objects.create_user(

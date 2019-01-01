@@ -51,7 +51,7 @@ class AccessToUserProfilesTest(FunctionalTest):
 
         # user_1 is redirected to his dedicated profile page
         redirect_url_1 = self.browser.current_url
-        self.assertRegex(redirect_url_1, f'/{ self.user_1.username }')
+        self.assertRegex(redirect_url_1, f'/{self.user_1.username}')
 
         # user_1 has write access to his events
         self.wait_for_text_in_body('Event 1', 'Edit')
@@ -71,7 +71,7 @@ class AccessToUserProfilesTest(FunctionalTest):
 
         # user_2 is redirected to his dedicated profile page
         redirect_url_2 = self.browser.current_url
-        self.assertRegex(redirect_url_2, f'/{ self.user_2.username }')
+        self.assertRegex(redirect_url_2, f'/{self.user_2.username}')
 
         # user_2 has write access to his events
         self.wait_for_text_in_body('Event 2', 'Edit')
@@ -81,7 +81,7 @@ class AccessToUserProfilesTest(FunctionalTest):
         self.assertNotEqual(redirect_url_1, redirect_url_2)
 
         # user_2 visits user_1 profile
-        self.browser.get(self.live_server_url + f'/{ self.user_1.username }')
+        self.browser.get(self.live_server_url + f'/{self.user_1.username}')
         self.wait_for_text_in_body('Event 1')
 
         # user_1 has readonly access to user_1 profile

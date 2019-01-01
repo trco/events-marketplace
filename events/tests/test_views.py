@@ -44,12 +44,12 @@ class UserProfileTest(CustomTestCase):
         self.client.login(username='user_1', password='test1234')
 
     def test_display_user_events(self):
-        response = self.client.get(f'/{ self.user_1.username }')
+        response = self.client.get(f'/{self.user_1.username}')
         self.assertContains(response, 'Test event #1')
         self.assertNotContains(response, 'Test event #2')
 
     def test_display_other_user_events_readonly(self):
-        response = self.client.get(f'/{ self.user_2.username }')
+        response = self.client.get(f'/{self.user_2.username}')
         self.assertContains(response, 'Test event #2')
         self.assertNotContains(response, 'Test event #1')
         self.assertNotContains(response, 'Edit')
@@ -99,14 +99,14 @@ class CreateEventViewTest(CustomTestCase):
 
     def test_redirect_after_post(self):
         response = self.post_data('Test title #1')
-        self.assertRedirects(response, f'/{ self.user_1.username }')
+        self.assertRedirects(response, f'/{self.user_1.username}')
 
 
 class UpdateEventViewTest(CustomTestCase):
 
     def post_data(self, event_id, title):
         return self.client.post(
-            f'/events/edit/{ event_id }',
+            f'/events/edit/{event_id}',
             data={'title': title}
         )
 
@@ -121,7 +121,7 @@ class UpdateEventViewTest(CustomTestCase):
         self.client.login(username='user_1', password='test1234')
 
     def test_displays_event_form(self):
-        response = self.client.get(f'/events/edit/{ self.event_1.id }')
+        response = self.client.get(f'/events/edit/{self.event_1.id}')
         self.assertIsInstance(response.context['form'], EventForm)
 
     def test_update_event_post(self):
@@ -132,7 +132,7 @@ class UpdateEventViewTest(CustomTestCase):
 
     def test_redirect_after_post(self):
         response = self.post_data(self.event_1.id, 'Test title #2')
-        self.assertRedirects(response, f'/{ self.user_1.username }')
+        self.assertRedirects(response, f'/{self.user_1.username}')
 
     def test_cannot_update_other_users_event(self):
         response = self.post_data(self.event_2.id, 'Test title #3')
@@ -143,7 +143,7 @@ class DeleteEventViewTest(CustomTestCase):
 
     def delete_post(self, event_id):
         return self.client.post(
-            f'/events/delete/{ event_id }'
+            f'/events/delete/{event_id}'
         )
 
     def setUp(self):
@@ -159,7 +159,7 @@ class DeleteEventViewTest(CustomTestCase):
 
     def test_delete_event_get(self):
         response = self.client.get(
-            f'/events/delete/{ self.event_1.id }'
+            f'/events/delete/{self.event_1.id}'
         )
         self.assertEqual(Event.objects.count(), 3)
         first_event = Event.objects.first()
@@ -174,7 +174,7 @@ class DeleteEventViewTest(CustomTestCase):
 
     def test_redirect_after_post(self):
         response = self.delete_post(self.event_1.id)
-        self.assertRedirects(response, f'/{ self.user_1.username }')
+        self.assertRedirects(response, f'/{self.user_1.username}')
 
     def test_cannot_delete_other_users_event(self):
         response = self.delete_post(self.event_3.id)
@@ -191,9 +191,9 @@ class EventDetailsViewTest(CustomTestCase):
         self.event_2 = self.create_event('Test event #2', self.user)
 
     def test_event_details_visit(self):
-        response = self.client.get(f'/events/{ self.event_1.id }')
+        response = self.client.get(f'/events/{self.event_1.id}')
         self.assertContains(response, 'Test event #1')
         self.assertNotContains(response, 'Test event #2')
-        response = self.client.get(f'/events/{ self.event_2.id }')
+        response = self.client.get(f'/events/{self.event_2.id}')
         self.assertContains(response, 'Test event #2')
         self.assertNotContains(response, 'Test event #1')

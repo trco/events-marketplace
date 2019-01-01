@@ -35,7 +35,7 @@ class Event(models.Model):
         super(Event, self).save(*args, **kwargs)
         if self.address:
             # get locality, country, latitude & longitude from GoogleMaps API
-            geo = json.loads(getLatLon(f'{ self.address }'))
+            geo = json.loads(getLatLon(f'{self.address}'))
             if geo['status'] == "OK":
                 for item in geo['results'][0]['address_components']:
                     if item['types'][0] == 'postal_town':

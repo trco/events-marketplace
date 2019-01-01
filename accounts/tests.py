@@ -44,4 +44,4 @@ class AuthenticationViewsTest(TestCase):
 
     def test_login_redirection(self):
         response = self.client.get('/accounts/login/redirection/')
-        self.assertRedirects(response, f'/{ self.user.username }')
+        self.assertRedirects(response, f'/{self.user.username}')

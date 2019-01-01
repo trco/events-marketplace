@@ -8,7 +8,7 @@ class ManageTicketsViewTest(CustomTestCase):
 
     def post_data(self, event_id, name):
         return self.client.post(
-            f'/tickets/{ event_id }',
+            f'/tickets/{event_id}',
             data={'name': name}
         )
 
@@ -21,7 +21,7 @@ class ManageTicketsViewTest(CustomTestCase):
         self.client.login(username='user', password='test1234')
 
     def test_displays_ticket_form(self):
-        response = self.client.get(f'/tickets/{ self.event.id }')
+        response = self.client.get(f'/tickets/{self.event.id}')
         self.assertIsInstance(response.context['form'], TicketForm)
 
     def test_invalid_input_returns_form_to_template(self):
@@ -50,14 +50,14 @@ class ManageTicketsViewTest(CustomTestCase):
 
     def test_redirect_after_post(self):
         response = self.post_data(self.event.id, 'Test ticket #1')
-        self.assertRedirects(response, f'/tickets/{ self.event.id }')
+        self.assertRedirects(response, f'/tickets/{self.event.id}')
 
 
 class DeleteTicketViewTest(CustomTestCase):
 
     def delete_post(self, ticket_id):
         return self.client.post(
-            f'/tickets/delete/{ ticket_id }'
+            f'/tickets/delete/{ticket_id}'
         )
 
     def setUp(self):
@@ -77,7 +77,7 @@ class DeleteTicketViewTest(CustomTestCase):
 
     def test_delete_ticket_get(self):
         response = self.client.get(
-            f'/tickets/delete/{ self.ticket_1.id }'
+            f'/tickets/delete/{self.ticket_1.id}'
         )
         self.assertEqual(Ticket.objects.count(), 3)
         first_ticket = Ticket.objects.first()
@@ -92,7 +92,7 @@ class DeleteTicketViewTest(CustomTestCase):
 
     def test_redirect_after_post(self):
         response = self.delete_post(self.ticket_1.id)
-        self.assertRedirects(response, f'/tickets/{ self.event_1.id }')
+        self.assertRedirects(response, f'/tickets/{self.event_1.id}')
 
     def test_cannot_delete_other_users_ticket(self):
         response = self.delete_post(self.ticket_3.id)

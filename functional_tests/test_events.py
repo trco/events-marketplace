@@ -44,7 +44,7 @@ class CreateEventTest(FunctionalTest):
 
         # user is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/{ self.user.username }')
+        self.assertRegex(redirect_url, f'/{self.user.username}')
 
         # user sees created event
         self.wait_for_text_in_body('Event 1')
@@ -59,7 +59,7 @@ class CreateEventTest(FunctionalTest):
 
         # user is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/{ self.user.username }')
+        self.assertRegex(redirect_url, f'/{self.user.username}')
 
         # user sees both created events
         self.wait_for_text_in_body('Event 1', 'Event 2')
@@ -96,7 +96,7 @@ class UpdateEventTest(FunctionalTest):
 
         # user_1 is redirected to the page with UpdateEvent form
         new_url = self.browser.current_url
-        self.assertRegex(new_url, f'/events/edit/{ self.event_1.id }')
+        self.assertRegex(new_url, f'/events/edit/{self.event_1.id}')
 
         # user_1 updates event
         form_field = self.browser.find_element_by_id('id_title')
@@ -106,7 +106,7 @@ class UpdateEventTest(FunctionalTest):
 
         # user_1 is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/{ self.user_1.username }')
+        self.assertRegex(redirect_url, f'/{self.user_1.username}')
 
         # user_1 sees updated event
         self.wait_for_text_in_body('Event 2')
@@ -119,10 +119,10 @@ class UpdateEventTest(FunctionalTest):
 
         # user_1 tries to edit other user's event
         self.browser.get(
-            self.live_server_url + f'/events/edit/{ self.event_2.id }'
+            self.live_server_url + f'/events/edit/{self.event_2.id}'
         )
         new_url = self.browser.current_url
-        self.assertRegex(new_url, f'/events/edit/{ self.event_2.id }')
+        self.assertRegex(new_url, f'/events/edit/{self.event_2.id}')
         self.wait_for_text_in_body('403 Forbidden')
 
 
@@ -147,12 +147,12 @@ class DeleteEventTest(FunctionalTest):
 
         # user_1 clicks Delete button
         self.browser.find_element_by_id(
-            f'id_delete_btn_{ self.event_1.id }'
+            f'id_delete_btn_{self.event_1.id}'
         ).click()
 
         # user_1 is redirected to the page for confirmation of deletion
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/events/delete/{ self.event_1.id }')
+        self.assertRegex(redirect_url, f'/events/delete/{self.event_1.id}')
 
         # user_1 checks page content
         header_text = self.browser.find_element_by_tag_name('h1').text
@@ -163,7 +163,7 @@ class DeleteEventTest(FunctionalTest):
 
         # user_1 is redirected to his dedicated profile page
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/{ self.user_1.username }')
+        self.assertRegex(redirect_url, f'/{self.user_1.username}')
         self.wait_for_text_in_body('Event 2')
         self.wait_for_text_in_body('Event 1', not_in=True)
 
@@ -175,10 +175,10 @@ class DeleteEventTest(FunctionalTest):
 
         # user_1 tries to delete other user's event
         self.browser.get(
-            self.live_server_url + f'/events/delete/{ self.event_3.id }'
+            self.live_server_url + f'/events/delete/{self.event_3.id}'
         )
         new_url = self.browser.current_url
-        self.assertRegex(new_url, f'/events/delete/{ self.event_3.id }')
+        self.assertRegex(new_url, f'/events/delete/{self.event_3.id}')
         self.wait_for_text_in_body('403 Forbidden')
 
 
@@ -200,7 +200,7 @@ class EventDetailsTest(FunctionalTest):
 
         # user is redirected to event details page
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/events/{ self.event.id }')
+        self.assertRegex(redirect_url, f'/events/{self.event.id}')
 
         # user checks page content
         event_title = self.browser.find_element_by_tag_name('h1').text

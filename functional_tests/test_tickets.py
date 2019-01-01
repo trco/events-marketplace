@@ -31,12 +31,12 @@ class ManageTicketsTest(FunctionalTest):
 
         # user_1 is redirected to the page for managing tickets
         new_url = self.browser.current_url
-        self.assertRegex(new_url, f'/tickets/{ self.event_1.id }')
+        self.assertRegex(new_url, f'/tickets/{self.event_1.id}')
 
         # user_1 checks page content
         self.assertIn('Events Marketplace', self.browser.title)
         header_text = self.browser.find_element_by_tag_name('h1').text
-        self.assertIn(f'Manage Tickets for { self.event_1.title }', header_text)
+        self.assertIn(f'Manage Tickets for {self.event_1.title}', header_text)
 
         # user_1 fills out & submits CreateTicket form
         name_field = self.browser.find_element_by_id('id_name')
@@ -45,7 +45,7 @@ class ManageTicketsTest(FunctionalTest):
 
         # user_1 is redirected to dedicated event tickets page
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/tickets/{ self.event_1.id }')
+        self.assertRegex(redirect_url, f'/tickets/{self.event_1.id}')
 
         # user_1 sees created ticket
         self.wait_for_text_in_body('Ticket 2')
@@ -53,7 +53,7 @@ class ManageTicketsTest(FunctionalTest):
         # user_1 checks if created ticket is visible at his profile page
         self.browser.get(self.live_server_url + '/user_1')
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/{ self.user_1.username }')
+        self.assertRegex(redirect_url, f'/{self.user_1.username}')
         self.wait_for_text_in_body('Event 1', 'Ticket 1', 'Ticket 2')
 
     def test_delete_ticket_can_delete_only_owned_tickets(self):
@@ -68,16 +68,16 @@ class ManageTicketsTest(FunctionalTest):
 
         # user_1 is redirected to the page for managing tickets
         new_url = self.browser.current_url
-        self.assertRegex(new_url, f'/tickets/{ self.event_1.id }')
+        self.assertRegex(new_url, f'/tickets/{self.event_1.id}')
 
         # user_1 clicks Delete button next to the ticket
         self.browser.find_element_by_id(
-            f'id_delete_btn_{ self.ticket_1.id }'
+            f'id_delete_btn_{self.ticket_1.id}'
         ).click()
 
         # user_1 is redirected to the page for confirmation of deletion
         redirect_url = self.browser.current_url
-        self.assertRegex(redirect_url, f'/tickets/delete/{ self.ticket_1.id }')
+        self.assertRegex(redirect_url, f'/tickets/delete/{self.ticket_1.id}')
 
         # user_1 checks page content
         header_text = self.browser.find_element_by_tag_name('h1').text
@@ -88,12 +88,12 @@ class ManageTicketsTest(FunctionalTest):
 
         # user_1 is redirected to the page for managing tickets
         new_url = self.browser.current_url
-        self.assertRegex(new_url, f'/tickets/{ self.event_1.id }')
+        self.assertRegex(new_url, f'/tickets/{self.event_1.id}')
 
         # user_1 checks that ticket was deleted also at his profile page
-        self.browser.get(self.live_server_url + f'/{ self.user_1.username }')
+        self.browser.get(self.live_server_url + f'/{self.user_1.username}')
         new_url = self.browser.current_url
-        self.assertRegex(new_url, f'{ self.user_1.username }')
+        self.assertRegex(new_url, f'{self.user_1.username}')
 
         # user_1 sees his event without ticket
         self.wait_for_text_in_body('Event 1')
@@ -101,8 +101,8 @@ class ManageTicketsTest(FunctionalTest):
 
         # user_1 tries to delete other user's ticket
         self.browser.get(
-            self.live_server_url + f'/tickets/delete/{ self.ticket_2.id }'
+            self.live_server_url + f'/tickets/delete/{self.ticket_2.id}'
         )
         new_url = self.browser.current_url
-        self.assertRegex(new_url, f'/tickets/delete/{ self.ticket_2.id }')
+        self.assertRegex(new_url, f'/tickets/delete/{self.ticket_2.id}')
         self.wait_for_text_in_body('403 Forbidden')
