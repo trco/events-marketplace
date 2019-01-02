@@ -3,14 +3,18 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from .decorators import user_is_event_owner
-from .forms import EventForm
+from .forms import EventForm, SearchEventsForm
 from .models import Event
 
 
 def index(request):
     context = {}
+
+    form = SearchEventsForm()
     events = Event.objects.all()
+
     context['events'] = events
+    context['form'] = form
 
     return render(request, 'events/index.html', context)
 

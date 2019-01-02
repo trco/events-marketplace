@@ -1,6 +1,17 @@
-from events.forms import EventForm
+from events.forms import EventForm, SearchEventsForm
 from events.models import Event
 from .base import CustomTestCase
+
+
+class SearchEventsFormTest(CustomTestCase):
+
+    def test_displays_search_events_form(self):
+        response = self.client.get('/')
+        self.assertIsInstance(response.context['form'], SearchEventsForm)
+
+    def test_get_success(self):
+        response = self.client.get(f'/events/search/?q=test')
+        self.assertEqual(response.status_code, 200)
 
 
 class CreateEventFormTest(CustomTestCase):

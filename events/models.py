@@ -28,11 +28,9 @@ class Event(models.Model):
     )
 
     def __str__(self):
-            return self.title
+        return self.title
 
     def save(self, *args, **kwargs):
-        # save Event to get self.address for geocoding
-        super(Event, self).save(*args, **kwargs)
         if self.address:
             # get locality, country, latitude & longitude from GoogleMaps API
             geo = json.loads(getLatLon(f'{self.address}'))
@@ -46,3 +44,5 @@ class Event(models.Model):
                         self.country = item['long_name']
                 self.latitude = geo['results'][0]['geometry']['location']['lat']
                 self.longitude = geo['results'][0]['geometry']['location']['lng']
+
+        super(Event, self).save(*args, **kwargs)

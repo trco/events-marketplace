@@ -40,10 +40,11 @@ class FunctionalTest(LiveServerTestCase):
             password=password
         )
 
-    def create_event(self, title, user):
+    def create_event(self, title, user, address=None):
         return Event.objects.create(
             title=title,
-            user=user
+            user=user,
+            address=address
         )
 
     def create_ticket(self, name, event):

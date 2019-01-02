@@ -1,7 +1,85 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from django.core.management import call_command
+from events.models import Event
 from .base import FunctionalTest
 
+
+class SearchEventsTest(FunctionalTest):
+
+    def setUp(self):
+        self.browser = webdriver.Firefox()
+        # create users
+        self.user_1 = self.create_user('user_1', 'test1234')
+        self.user_2 = self.create_user('user_2', 'test1234')
+        # create events
+        self.event_1 = Event.objects.create(
+            title='Photography workshop',
+            user=self.user_1,
+            locality='Paris',
+            country='France'
+        )
+        self.event_2 = Event.objects.create(
+            title='Metallica concert',
+            user=self.user_1,
+            locality='London',
+            country='United Kingdom'
+        )
+        self.event_3 = Event.objects.create(
+            title='Meditation & joga',
+            user=self.user_2,
+            locality='London',
+            country='United Kingdom'
+        )
+        self.event_4 = Event.objects.create(
+            title='Football match',
+            user=self.user_2,
+            locality='Ljubljana',
+            country='Slovenia'
+        )
+        # haystack reindex
+        call_command('rebuild_index', interactive=False)
+
+    def test_index_page_search_events(self):
+        # user visits the index page
+        self.browser.get(self.live_server_url)
+
+        # user fills out & submits search form
+        search_field = self.browser.find_element_by_id('id_q')
+        search_field.send_keys('football')
+        self.browser.find_element_by_id('id_search_btn').click()
+
+        # user is redirected to search page
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, '/events/search')
+
+        # user sees events matching search string
+        self.wait_for_text_in_body('Football match')
+        self.wait_for_text_in_body(
+            'Photography workshop',
+            'Metallica concert',
+            'Meditation & joga',
+            not_in=True
+        )
+
+    def test_search_page_search_events(self):
+        # user visits the search page
+        self.browser.get(self.live_server_url + '/events/search')
+
+        # user fills out & submits search form
+        search_field = self.browser.find_element_by_id('id_q')
+        search_field.send_keys('london')
+        self.browser.find_element_by_id('id_search_btn').click()
+
+        # user is redirected to search page
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, '/events/search')
+
+        # user sees events matching search string
+        self.wait_for_text_in_body('Metallica concert', 'Meditation & joga')
+        self.wait_for_text_in_body(
+            'Photography workshop', 'Football match', not_in=True
+        )
 
 class CreateEventTest(FunctionalTest):
 

@@ -1,0 +1,3 @@
+{{ object.title }}
+{{ object.locality }}
+{{ object.country }}
