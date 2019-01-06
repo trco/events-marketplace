@@ -7,7 +7,6 @@
     <h1>Events Marketplace</h1>
     <a href="/events/add">Add Event</a>
     <form method="get" action="{% url 'haystack_search' %}">
-      {% csrf_token %}
       <input type="text" name="q" id="id_q">
       <input id="id_search_btn" type="submit" name="" value="Search">
     </form>
