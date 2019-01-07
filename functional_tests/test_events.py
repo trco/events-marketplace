@@ -12,28 +12,36 @@ class SearchEventsTest(FunctionalTest):
         # create users
         self.user_1 = self.create_user('user_1', 'test1234')
         self.user_2 = self.create_user('user_2', 'test1234')
+        # create categories
+        self.category_1 = self.create_category('Workshops')
+        self.category_2 = self.create_category('Concerts')
+        self.category_3 = self.create_category('Sports')
         # create events
         self.event_1 = Event.objects.create(
             title='Photography workshop',
             user=self.user_1,
+            category=self.category_1,
             locality='Paris',
             country='France'
         )
         self.event_2 = Event.objects.create(
             title='Metallica concert',
             user=self.user_1,
+            category=self.category_2,
             locality='London',
             country='United Kingdom'
         )
         self.event_3 = Event.objects.create(
-            title='Meditation & joga',
+            title='How to orginize a concert?',
             user=self.user_2,
+            category=self.category_1,
             locality='London',
             country='United Kingdom'
         )
         self.event_4 = Event.objects.create(
             title='Football match',
             user=self.user_2,
+            category=self.category_3,
             locality='Ljubljana',
             country='Slovenia'
         )
@@ -46,19 +54,43 @@ class SearchEventsTest(FunctionalTest):
 
         # user fills out & submits search form
         search_field = self.browser.find_element_by_id('id_q')
-        search_field.send_keys('football')
+        search_field.send_keys('concert')
         self.browser.find_element_by_id('id_search_btn').click()
 
         # user is redirected to search page
         redirect_url = self.browser.current_url
         self.assertRegex(redirect_url, '/events/search')
+        self.assertRegex(redirect_url, 'q=concert')
 
-        # user sees events matching search string
-        self.wait_for_text_in_body('Football match')
+        # user sees events matching search string and their categories
+        self.wait_for_text_in_body(
+            'Metallica concert',
+            'How to orginize a concert?',
+            'Concerts',
+            'Workshops'
+        )
         self.wait_for_text_in_body(
             'Photography workshop',
-            'Metallica concert',
-            'Meditation & joga',
+            'Football match',
+            not_in=True
+        )
+
+        # user clicks on category link
+        self.browser.find_element_by_link_text('Concerts').click()
+
+        # user is redirected to the search page matching the selection
+        redirect_url = self.browser.current_url
+        self.assertRegex(redirect_url, '/events/search')
+        self.assertRegex(
+            redirect_url,
+            'q=concert&selected_facets=category_exact:Concerts'
+        )
+
+        # user sees only selected category and events within this category
+        self.wait_for_text_in_body('Metallica concert', 'Concerts')
+        self.wait_for_text_in_body(
+            'Workshops',
+            'How to orginize a concert?',
             not_in=True
         )
 
@@ -76,10 +108,14 @@ class SearchEventsTest(FunctionalTest):
         self.assertRegex(redirect_url, '/events/search')
 
         # user sees events matching search string
-        self.wait_for_text_in_body('Metallica concert', 'Meditation & joga')
+        self.wait_for_text_in_body(
+            'Metallica concert',
+            'How to orginize a concert?'
+        )
         self.wait_for_text_in_body(
             'Photography workshop', 'Football match', not_in=True
         )
+
 
 class CreateEventTest(FunctionalTest):
 

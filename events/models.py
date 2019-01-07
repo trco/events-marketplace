@@ -4,9 +4,19 @@ from django.db import models
 from .utils import getLatLon
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=128, null=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Event(models.Model):
     # relationships
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    category = models.ForeignKey(
+        Category, on_delete=models.CASCADE, blank=True, null=True
+    )
     # information
     title = models.CharField(max_length=128, null=True)
     start_date = models.DateField(blank=True, null=True)

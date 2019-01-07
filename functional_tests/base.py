@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
-from events.models import Event
+from events.models import Category, Event
 from tickets.models import Ticket
 
 
@@ -39,6 +39,9 @@ class FunctionalTest(LiveServerTestCase):
             username=username,
             password=password
         )
+
+    def create_category(self, name):
+        return Category.objects.create(name=name)
 
     def create_event(self, title, user, address=None):
         return Event.objects.create(

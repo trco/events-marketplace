@@ -12,9 +12,26 @@
     </form>
 
     {% if query %}
-      <h3>Results</h3>
+      <!-- Begin faceting. -->
+      <h2>By Category</h2>
 
-      {% for result in page.object_list %}
+      <div>
+        <dl>
+          {% if facets.fields.category %}
+            <dt>Category</dt>
+            {# Provide only the top 5 categories #}
+            {% for category in facets.fields.category|slice:":5" %}
+              <dd><a href="{{ request.get_full_path }}&amp;selected_facets=category_exact:{{ category.0|urlencode }}">{{ category.0 }}</a> ({{ category.1 }})</dd>
+            {% endfor %}
+          {% else %}
+            <p>No category facets.</p>
+          {% endif %}
+        </dl>
+      </div>
+      <!-- End faceting -->
+      <h3>Results for {{ query }}</h3>
+
+      {% for result in object_list %}
         <p>
           <a href="/events/{{ result.object.id }}">{{ result.object.title }}</a>
         </p>
