@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from haystack.generic_views import FacetedSearchView
 from .decorators import user_is_event_owner
 from .forms import EventForm, SearchEventsForm
 from .models import Event
@@ -17,6 +18,12 @@ def index(request):
     context['form'] = form
 
     return render(request, 'events/index.html', context)
+
+
+# uses haystack's FacetedSearchForm by default
+class SearchFilterView(FacetedSearchView):
+    template_name = 'search/search.html'
+    facet_fields = ['category']
 
 
 @login_required

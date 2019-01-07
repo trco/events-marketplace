@@ -7,7 +7,7 @@ class EventForm(forms.ModelForm):
 
     class Meta:
         model = Event
-        fields = ('title', 'address')
+        fields = ('title', 'address', 'category')
 
     def save(self, *args, user=None, **kwargs):
         if user is not None:

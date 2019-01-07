@@ -5,6 +5,8 @@ from events import views as events_views
 urlpatterns = [
     path('', events_views.index,
          name='index'),
+    path('events/search', events_views.SearchFilterView.as_view(),
+         name='haystack_search'),
     path('<str:username>', events_views.user_profile,
          name='user_profile'),
     path('events/<int:event_id>', events_views.event_details,

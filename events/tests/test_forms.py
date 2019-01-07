@@ -10,7 +10,7 @@ class SearchEventsFormTest(CustomTestCase):
         self.assertIsInstance(response.context['form'], SearchEventsForm)
 
     def test_get_success(self):
-        response = self.client.get(f'/events/search/?q=test')
+        response = self.client.get(f'/events/search?q=test')
         self.assertEqual(response.status_code, 200)
 
 
